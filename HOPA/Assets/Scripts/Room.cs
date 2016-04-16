@@ -1,13 +1,21 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
 public class Room : MonoBehaviour
 {
+    #region events
+
+    public UnityEvent AllPickableObjectsCollectedEvent;
+
+    #endregion
+
     #region properties
 
+    public List<PickableObject> PickablePickedObjects { get; private set; }
     public List<PickableObject> PickableObjects { get; private set; }
-    public List<UsableObject> UsableObjects { get; private set; }
+    public List<PickableUsableObject> PickableUsableObjects { get; private set; }
 
     #endregion
 
@@ -15,8 +23,11 @@ public class Room : MonoBehaviour
     {
         // gather all pickableobjects in a room 
 
+        AllPickableObjectsCollectedEvent = new UnityEvent();
+
         PickableObjects = new List<PickableObject>();
-        UsableObjects = new List<UsableObject>();
+        PickablePickedObjects = new List<PickableObject>();
+        PickableUsableObjects = new List<PickableUsableObject>();
         PickableObject[] objs = this.gameObject.GetComponentsInChildren<PickableObject>();
         foreach (PickableObject obj in objs)
         {
@@ -24,9 +35,9 @@ public class Room : MonoBehaviour
             {
                 PickableObjects.Add(obj);
             }
-            else if(obj.GetType() == typeof(UsableObject))
+            else if(obj.GetType() == typeof(PickableUsableObject))
             {
-                UsableObjects.Add((UsableObject)obj);
+                PickableUsableObjects.Add((PickableUsableObject)obj);
             }
         }
 
@@ -49,11 +60,17 @@ public class Room : MonoBehaviour
     {
         if (obj.GetType() == typeof(PickableObject))
         {
-            PickableObjects.Remove(obj);
+            //PickableObjects.Remove(obj);
+            PickablePickedObjects.Add(obj);
+
+            if(PickableObjects.Count == PickablePickedObjects.Count)
+            {
+                AllPickableObjectsCollectedEvent.Invoke();
+            }
         }
-        else if (obj.GetType() == typeof(UsableObject))
+        else if (obj.GetType() == typeof(PickableUsableObject))
         {
-            UsableObjects.Remove((UsableObject)obj);
+            PickableUsableObjects.Remove((PickableUsableObject)obj);
         }
         
     }

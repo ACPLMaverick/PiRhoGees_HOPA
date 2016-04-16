@@ -34,7 +34,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     #region private
 
     private List<PickableObject> pickableList;
-    private List<UsableObject> usableList;
+    private List<PickableUsableObject> usableList;
 
     private Dictionary<PickableObject, Text> allPickablesDict;
 
@@ -47,7 +47,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     {
         allPickablesDict = new Dictionary<PickableObject, Text>();
         pickableList = new List<PickableObject>();
-        usableList = new List<UsableObject>();
+        usableList = new List<PickableUsableObject>();
         CurrentMode = EquipmentMode.PICKABLES;
 
         StartGUI();
@@ -66,7 +66,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
         StartCoroutine(AddObjectToListCoroutine(obj, lagSeconds));
     }
 
-    public void AddObjectToPool(UsableObject obj, float lagSeconds)
+    public void AddObjectToPool(PickableUsableObject obj, float lagSeconds)
     {
         StartCoroutine(AddObjectToPoolCoroutine(obj, lagSeconds));
 
@@ -79,7 +79,22 @@ public class EquipmentManager : Singleton<EquipmentManager>
         SwitchPanel();
     }
 
-    private IEnumerator AddObjectToPoolCoroutine(UsableObject obj, float lagSeconds)
+    public void FlushOnNextRoom()
+    {
+        allPickablesDict.Clear();
+
+        Text[] itemtexts = PanelPickableList.GetComponentsInChildren<Text>();
+        int count = itemtexts.Length;
+
+        for(int i = 0; i < count; ++i)
+        {
+            GameObject.Destroy(itemtexts[i].gameObject);
+        }
+
+        StartGUI();
+    }
+
+    private IEnumerator AddObjectToPoolCoroutine(PickableUsableObject obj, float lagSeconds)
     {
         yield return new WaitForSeconds(lagSeconds);
 
@@ -91,7 +106,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
         obj.transform.localScale = Vector3.one * 0.7f;
 
         usableList.Add(obj);
-        obj.gameObject.transform.SetParent(PanelUsableList);
 
         yield return null;
     }
@@ -103,9 +117,14 @@ public class EquipmentManager : Singleton<EquipmentManager>
         pickableList.Add(obj);
 
         Text associated = allPickablesDict[obj];
-        associated.fontStyle = FontStyle.Bold;
+        ChangeTextToPicked(associated);
 
         yield return null;
+    }
+
+    private void ChangeTextToPicked(Text text)
+    {
+        text.fontStyle = FontStyle.Bold;
     }
 
     private void StartGUI()
@@ -135,6 +154,11 @@ public class EquipmentManager : Singleton<EquipmentManager>
             }
             newobj.transform.position = nextPos;
 
+            if(GameManager.Instance.CurrentRoom.PickablePickedObjects.Contains(obj))
+            {
+                ChangeTextToPicked(text);
+            }
+
             allPickablesDict.Add(obj, text);
             ++i;
         }
@@ -146,11 +170,21 @@ public class EquipmentManager : Singleton<EquipmentManager>
         {
             PanelPickableList.gameObject.SetActive(true);
             PanelUsableList.gameObject.SetActive(false);
+
+            foreach(PickableObject obj in usableList)
+            {
+                obj.gameObject.SetActive(false);
+            }
         }
         else if(CurrentMode == EquipmentMode.USABLES)
         {
             PanelPickableList.gameObject.SetActive(false);
             PanelUsableList.gameObject.SetActive(true);
+
+            foreach (PickableObject obj in usableList)
+            {
+                obj.gameObject.SetActive(true);
+            }
         }
     }
 

@@ -42,6 +42,7 @@ public class PickableObject : MonoBehaviour
     {
         if (col != null && col.gameObject == this.gameObject)
         {
+            col.gameObject.transform.SetParent(Camera.main.transform, true);
             Vector3 tgt = Vector3.zero, scl = Vector3.zero;
 
             if(EquipmentManager.Instance.CurrentMode == EquipmentManager.EquipmentMode.PICKABLES)
@@ -59,6 +60,7 @@ public class PickableObject : MonoBehaviour
 
             EquipmentManager.Instance.AddObjectToList(this, FADE_OUT_TIME_SEC);
             InputManager.OnInputClickDown -= PickUp;
+            //col.gameObject.transform.SetParent(Camera.main.transform, true);
 
             InvokeOnPickedUp(this);
 
@@ -75,13 +77,13 @@ public class PickableObject : MonoBehaviour
     protected IEnumerator FlyToTarget(Vector3 targetPos, Vector3 targetScale, float time)
     {
         float currentTime = Time.time;
-        Vector3 startPos = transform.localPosition;
+        Vector3 startPos = transform.position;
         Vector3 startScale = transform.localScale;
         while(Time.time - currentTime <= time)
         {
             float lerp = (Time.time - currentTime) / time;
 
-            transform.localPosition = Vector3.Lerp(startPos, targetPos, lerp);
+            transform.position = Vector3.Lerp(startPos, targetPos, lerp);
             transform.localScale = Vector3.Lerp(startScale, targetScale, lerp);
             yield return null;
         }

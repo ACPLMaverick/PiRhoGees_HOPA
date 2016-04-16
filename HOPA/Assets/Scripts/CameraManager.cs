@@ -10,7 +10,6 @@ public class CameraManager : Singleton<CameraManager>
     #region public
 
     public Camera CameraControlled = null;
-    public Room CurrentRoom = null;
     public float CameraMovementRate = 1.0f;
     public float CameraZoomRate = 0.1f;
     public float CameraZoomMin = 0.1f;
@@ -32,20 +31,7 @@ public class CameraManager : Singleton<CameraManager>
     {
         // acquire background min and max points
 
-        SpriteRenderer sr = CurrentRoom.GetComponent<SpriteRenderer>();
-        _bMin.x = sr.sprite.bounds.center.x - sr.sprite.bounds.extents.x;
-        _bMin.y = sr.sprite.bounds.center.y - sr.sprite.bounds.extents.y;
-        _bMax.x = sr.sprite.bounds.center.x + sr.sprite.bounds.extents.x;
-        _bMax.y = sr.sprite.bounds.center.y + sr.sprite.bounds.extents.y;
-
-        Transform tr = CurrentRoom.GetComponent<Transform>();
-        Vector4 min4 = new Vector4(_bMin.x, _bMin.y, 0.0f, 1.0f);
-        Vector4 max4 = new Vector4(_bMax.x, _bMax.y, 0.0f, 1.0f);
-        min4 = tr.localToWorldMatrix * min4;
-        max4 = tr.localToWorldMatrix * max4;
-
-        _bMin = new Vector2(min4.x, min4.y);
-        _bMax = new Vector2(max4.x, max4.y);
+        InitCameraBoundaries();
 
         // register for events
 
@@ -59,6 +45,34 @@ public class CameraManager : Singleton<CameraManager>
         
 	}
 
+    public void RecalculateToCurrentRoom()
+    {
+        Room cr = GameManager.Instance.CurrentRoom;
+
+        CameraControlled.transform.position = new Vector3(cr.transform.position.x, cr.transform.position.y, CameraControlled.transform.position.z);
+        CameraControlled.orthographicSize = CameraZoomMax;
+        InitCameraBoundaries();
+        FixCameraZoomBoundaries();
+    }
+
+    private void InitCameraBoundaries()
+    {
+        SpriteRenderer sr = GameManager.Instance.CurrentRoom.GetComponent<SpriteRenderer>();
+        _bMin.x = sr.sprite.bounds.center.x - sr.sprite.bounds.extents.x;
+        _bMin.y = sr.sprite.bounds.center.y - sr.sprite.bounds.extents.y;
+        _bMax.x = sr.sprite.bounds.center.x + sr.sprite.bounds.extents.x;
+        _bMax.y = sr.sprite.bounds.center.y + sr.sprite.bounds.extents.y;
+
+        Transform tr = GameManager.Instance.CurrentRoom.GetComponent<Transform>();
+        Vector4 min4 = new Vector4(_bMin.x, _bMin.y, 0.0f, 1.0f);
+        Vector4 max4 = new Vector4(_bMax.x, _bMax.y, 0.0f, 1.0f);
+        min4 = tr.localToWorldMatrix * min4;
+        max4 = tr.localToWorldMatrix * max4;
+
+        _bMin = new Vector2(min4.x, min4.y);
+        _bMax = new Vector2(max4.x, max4.y);
+    }
+
     private void MoveCamera(Vector2 origin, Vector2 direction, Collider hitCollider)
     {
         //Debug.Log(origin);
@@ -66,7 +80,7 @@ public class CameraManager : Singleton<CameraManager>
 
         // check if we point the background or other object
         // we hit other object or nothing - return
-        if (hitCollider == null || hitCollider.gameObject != CurrentRoom.gameObject)
+        if (hitCollider == null || hitCollider.gameObject != GameManager.Instance.CurrentRoom.gameObject)
         {
             return;
         }
