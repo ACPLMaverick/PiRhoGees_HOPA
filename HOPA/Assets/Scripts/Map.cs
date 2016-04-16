@@ -10,6 +10,8 @@ public class Map : PickableUsableObject
     #region public
 
     public Image MapObject;
+    public AudioClip SoundUnfold;
+    public AudioClip SoundFold;
 
     #endregion
 
@@ -66,12 +68,14 @@ public class Map : PickableUsableObject
     {
         StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
         MapObject.gameObject.SetActive(true);
+        AudioManager.Instance.PlayClip(SoundUnfold, 0.0f);
     }
 
     protected void HideMap()
     {
         StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, false));
         _isEnabled = false;
+        AudioManager.Instance.PlayClip(SoundFold, 0.0f);
     }
 
     protected IEnumerator MapVisibilityCoroutine(float timeSeconds, float targetOpacity, bool isUsableOnFinal)
