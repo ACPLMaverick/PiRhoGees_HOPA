@@ -5,8 +5,10 @@ using UnityEngine.UI;
 public class FormUIManager : MonoBehaviour {
 
     #region constants
+    public const string MaleHeader = "Szanowny Panie";
     public const string MaleAccusative = "Pana";
     public const string MaleNominative = "Pan";
+    public const string FemaleHeader = "Szanowna Pani";
     public const string FemaleAccusative = "Panią";
     public const string FemaleNominative = "Pani";
     #endregion
@@ -14,7 +16,6 @@ public class FormUIManager : MonoBehaviour {
     #region public
     public Text FormHeaderText;
     public InputField FirstNameInput;
-    public InputField LastNameInput;
     public Toggle MaleToggle;
     public Toggle FemaleToggle;
     public Button ProceedButton;
@@ -25,7 +26,6 @@ public class FormUIManager : MonoBehaviour {
 
     #region private
     private string _firstName;
-    private string _lastName;
     private string _gender;
     #endregion
 
@@ -33,7 +33,6 @@ public class FormUIManager : MonoBehaviour {
     // Use this for initialization
     void Start () {
         _firstName = "";
-        _lastName = "";
         _gender = "";
 	}
 	
@@ -54,7 +53,7 @@ public class FormUIManager : MonoBehaviour {
 
     public void TurnOnProceedButton()
     {
-        if (_firstName != "" && _lastName != "" && _gender != "")
+        if (_firstName != "" && _gender != "")
         {
             ProceedButton.interactable = true;
         }
@@ -66,12 +65,20 @@ public class FormUIManager : MonoBehaviour {
 
     public void ShowLetter(string gender)
     {
-        string tmp;
+        string tmp = "";
 
         TurnOffForm();
 
         LetterHeaderText.gameObject.SetActive(true);
-        tmp = string.Format(LetterHeaderText.text, PlayerPrefs.GetString("LastName"));
+        switch (gender)
+        {
+            case "K":
+                tmp = string.Format(LetterHeaderText.text, FemaleHeader);
+                break;
+            case "M":
+                tmp = string.Format(LetterHeaderText.text, MaleHeader);
+                break;
+        }
         LetterHeaderText.text = tmp;
 
         LetterContextText.gameObject.SetActive(true);
@@ -91,7 +98,6 @@ public class FormUIManager : MonoBehaviour {
     {
         FormHeaderText.gameObject.SetActive(false);
         FirstNameInput.gameObject.SetActive(false);
-        LastNameInput.gameObject.SetActive(false);
         MaleToggle.gameObject.SetActive(false);
         FemaleToggle.gameObject.SetActive(false);
         ProceedButton.gameObject.SetActive(false);
@@ -102,13 +108,6 @@ public class FormUIManager : MonoBehaviour {
     public void OnFirstNameInputEndEdit()
     {
         _firstName = FirstNameInput.text;
-        Debug.Log(_firstName + " " + _lastName);
-    }
-
-    public void OnLastNameInputEndEdit()
-    {
-        _lastName = LastNameInput.text;
-        Debug.Log(_firstName + " " + _lastName);
     }
 
     public void OnMaleToggleValueChange()
@@ -138,7 +137,6 @@ public class FormUIManager : MonoBehaviour {
     public void OnProceedButtonClick()
     {
         PlayerPrefs.SetString("FirstName", _firstName);
-        PlayerPrefs.SetString("LastName", _lastName);
         PlayerPrefs.SetString("Gender", _gender);
 
         ShowLetter(PlayerPrefs.GetString("Gender"));
