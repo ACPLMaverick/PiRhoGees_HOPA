@@ -18,14 +18,16 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     #region constants
 
+    private int USABLE_MAX_ITEMS = 5;
 
     #endregion
 
     #region public
 
     public RectTransform PanelPickableList;
-    public GameObject PickableListElementPrefab;
     public RectTransform PanelUsableList;
+    public GameObject PickableListElementPrefab;
+    public GameObject UsableListElementPrefab;
     public Button ButtonEquipmentPickableToggle;
 
     #endregion
@@ -33,15 +35,25 @@ public class EquipmentManager : Singleton<EquipmentManager>
     #region properties
 
     public EquipmentMode CurrentMode { get; private set; }
+    private bool EquipmentFreeContainersAvailable
+    {
+        get
+        {
+            return _usableContainersOccupiedCount < USABLE_MAX_ITEMS;
+        }
+    }
 
     #endregion
 
     #region private
 
-    private List<PickableObject> pickableList;
-    private List<PickableUsableObject> usableList;
+    private List<PickableObject> _pickableList;
+    private List<PickableUsableObject> _usableList;
 
-    private Dictionary<PickableObject, Text> allPickablesDict;
+    private Dictionary<PickableObject, Text> _allPickablesDict;
+
+    private UsableContainer[] _usableContainers;
+    private int _usableContainersOccupiedCount = 0;
 
     #endregion
 
@@ -50,12 +62,13 @@ public class EquipmentManager : Singleton<EquipmentManager>
     // Use this for initialization
     void Start ()
     {
-        allPickablesDict = new Dictionary<PickableObject, Text>();
-        pickableList = new List<PickableObject>();
-        usableList = new List<PickableUsableObject>();
+        _allPickablesDict = new Dictionary<PickableObject, Text>();
+        _pickableList = new List<PickableObject>();
+        _usableList = new List<PickableUsableObject>();
         CurrentMode = EquipmentMode.PICKABLES;
 
-        StartGUI();
+        StartGUIPickables();
+        StartGUIUsables();
 
         SwitchPanel();
     }
@@ -73,6 +86,11 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     public void AddObjectToPool(PickableUsableObject obj, float lagSeconds)
     {
+        if(_usableContainersOccupiedCount == USABLE_MAX_ITEMS)
+        {
+            return;
+        }
+
         StartCoroutine(AddObjectToPoolCoroutine(obj, lagSeconds));
 
         obj.gameObject.layer = LayerMask.NameToLayer("UI");
@@ -86,7 +104,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     public void FlushOnNextRoom()
     {
-        allPickablesDict.Clear();
+        _allPickablesDict.Clear();
 
         Text[] itemtexts = PanelPickableList.GetComponentsInChildren<Text>();
         int count = itemtexts.Length;
@@ -96,22 +114,27 @@ public class EquipmentManager : Singleton<EquipmentManager>
             GameObject.Destroy(itemtexts[i].gameObject);
         }
 
-        StartGUI();
+        StartGUIPickables();
     }
 
     private IEnumerator AddObjectToPoolCoroutine(PickableUsableObject obj, float lagSeconds)
     {
         yield return new WaitForSeconds(lagSeconds);
 
-        obj.gameObject.transform.SetParent(Camera.main.transform, true);
-        Vector2 firstPos = PanelUsableList.position;
-        firstPos.x -= PanelUsableList.rect.width * 0.5f - obj.GetComponent<SpriteRenderer>().sprite.rect.width * 0.8f;
-        Vector3 firstPosWorld = Camera.main.ScreenToWorldPoint(new Vector3(firstPos.x, firstPos.y, 0.0f));
-        firstPosWorld.z = obj.transform.position.z;
-        obj.transform.position = firstPosWorld;
-        obj.transform.localScale = Vector3.one * 0.7f;
+        UsableContainer container = null;
+        for(int i = 0; i < USABLE_MAX_ITEMS; ++i)
+        {
+            container = _usableContainers[i];
+            if(container.IsFree)
+            {
+                break;
+            }
+        }
 
-        usableList.Add(obj);
+        obj.AssignEquipmentContainer(container);
+        container.AssignEquipmentUsable(obj);
+
+        _usableList.Add(obj);
 
         yield return null;
     }
@@ -120,9 +143,9 @@ public class EquipmentManager : Singleton<EquipmentManager>
     {
         yield return new WaitForSeconds(lagSeconds);
 
-        pickableList.Add(obj);
+        _pickableList.Add(obj);
 
-        Text associated = allPickablesDict[obj];
+        Text associated = _allPickablesDict[obj];
         ChangeTextToPicked(associated);
 
         yield return null;
@@ -133,7 +156,37 @@ public class EquipmentManager : Singleton<EquipmentManager>
         text.fontStyle = FontStyle.Bold;
     }
 
-    private void StartGUI()
+    private void StartGUIUsables()
+    {
+        _usableContainers = new UsableContainer[USABLE_MAX_ITEMS];
+
+        Vector2 firstPos = PanelUsableList.position;
+        GameObject container = (GameObject)Instantiate(UsableListElementPrefab, firstPos, Quaternion.identity);
+        float xDelta = (PanelUsableList.rect.height - (container.GetComponent<Image>()).rectTransform.rect.height) * 0.5f;
+        float panelWidth = container.GetComponent<RectTransform>().rect.width;
+        float objTotalDelta = panelWidth + xDelta;
+        float containerWidth = container.GetComponent<Image>().rectTransform.rect.width;
+        firstPos.x += (panelWidth - (USABLE_MAX_ITEMS * containerWidth + (USABLE_MAX_ITEMS - 1) * xDelta)) * 0.5f;
+        container.transform.position = firstPos;
+        container.transform.SetParent(PanelUsableList.transform, true);
+        _usableContainers[0] = container.GetComponent<UsableContainer>();
+
+        for (int i = 1; i < USABLE_MAX_ITEMS; ++i)
+        {
+            firstPos.x += objTotalDelta;
+            container = (GameObject)Instantiate(UsableListElementPrefab, firstPos, Quaternion.identity);
+            container.transform.SetParent(PanelUsableList.transform, true);
+            _usableContainers[i] = container.GetComponent<UsableContainer>();
+        }
+        
+        for (int i = 0; i < USABLE_MAX_ITEMS; ++i)
+        {
+            _usableContainers[i].UsableField.UsableImage.enabled = false;
+            _usableContainers[i].UsableField.UsableCanvasGroup.alpha = 0.0f;
+        }
+    }
+
+    private void StartGUIPickables()
     {
         List<PickableObject> pickablesOnLevel = GameManager.Instance.CurrentRoom.PickableObjects;
 
@@ -165,7 +218,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 ChangeTextToPicked(text);
             }
 
-            allPickablesDict.Add(obj, text);
+            _allPickablesDict.Add(obj, text);
             ++i;
         }
     }
@@ -177,7 +230,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
             PanelPickableList.gameObject.SetActive(true);
             PanelUsableList.gameObject.SetActive(false);
 
-            foreach (PickableObject obj in usableList)
+            foreach (PickableObject obj in _usableList)
             {
                 obj.gameObject.SetActive(false);
             }
@@ -187,7 +240,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
             PanelPickableList.gameObject.SetActive(false);
             PanelUsableList.gameObject.SetActive(true);
 
-            foreach (PickableObject obj in usableList)
+            foreach (PickableObject obj in _usableList)
             {
                 obj.gameObject.SetActive(true);
             }

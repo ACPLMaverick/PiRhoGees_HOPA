@@ -57,7 +57,7 @@ public class GameManager : Singleton<GameManager>
             FadeImage.canvasRenderer.SetAlpha(lerpValue);
             yield return null;
         }
-        FadeImage.canvasRenderer.SetAlpha(1);
+        FadeImage.canvasRenderer.SetAlpha(1.0f);
         MoveToCurrentRoom();
 
         yield return null;

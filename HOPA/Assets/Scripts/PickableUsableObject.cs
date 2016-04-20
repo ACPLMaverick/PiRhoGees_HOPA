@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 [System.Serializable]
@@ -27,6 +29,12 @@ public class PickableUsableObject : PickableObject
 
     #region private
 
+    private UsableContainer _container = null;
+    private Vector2 _startSlotPosition;
+    private bool _actionsLocked = false;
+    private Transform _tempTransform = null;
+    private Canvas _canvasForSelectedUsable = null;
+
     #endregion
 
     #region functions 
@@ -34,10 +42,9 @@ public class PickableUsableObject : PickableObject
     // Use this for initialization
     protected override void Start ()
     {
+        _canvasForSelectedUsable = FindObjectOfType<Canvas>();
         IsInEquipment = false;
         base.Start();
-
-        InputManager.OnInputClickUp += OnClickInEquipment;
 	}
 	
 	// Update is called once per frame
@@ -45,6 +52,15 @@ public class PickableUsableObject : PickableObject
     {
         base.Update();
 	}
+
+    public void AssignEquipmentContainer(UsableContainer container)
+    {
+        _container = container;
+        GetComponent<SpriteRenderer>().enabled = false;
+        _container.UsableField.PointerUpEvent.AddListener(new UnityEngine.Events.UnityAction<UnityEngine.EventSystems.PointerEventData>(OnClickUpInEquipment));
+        _container.UsableField.DragEvent.AddListener(new UnityEngine.Events.UnityAction<UnityEngine.EventSystems.PointerEventData>(OnClickHoldInEquipment));
+        _container.UsableField.PointerDownEvent.AddListener(new UnityEngine.Events.UnityAction<UnityEngine.EventSystems.PointerEventData>(OnClickDownInEquipment));
+    }
 
     protected override void PickUp(Vector2 position, Collider2D col)
     {
@@ -88,21 +104,81 @@ public class PickableUsableObject : PickableObject
         IsInEquipment = true;
     }
 
-    protected void OnClickInEquipment(Vector2 screenPos, Collider2D hitCollider)
+    protected void OnClickUpInEquipment(UnityEngine.EventSystems.PointerEventData eventData)
     {
-        if(hitCollider != null && hitCollider.gameObject == this.gameObject && IsInEquipment)
+        if (!_actionsLocked)
         {
-            RaycastHit2D hit = Physics2D.Raycast(gameObject.transform.position, Vector3.forward, 0.01f);
+            _actionsLocked = true;
+            StartCoroutine(OnClickUpReturnToSlotCoroutine(_container.UsableField.GetComponent<RectTransform>().position, _startSlotPosition, 0.5f));
 
-            if(hit.collider != null && (hit.collider.gameObject.tag == "Usable" || hit.collider.gameObject.tag == "PickableUsable"))
+            // check for mouse collisions with scene objects
+            Collider2D col = InputManager.Instance.GetCollider2DUnderCursor();
+            int objectsLayerID = LayerMask.NameToLayer("Objects");
+            if (col != null && col.gameObject.layer == objectsLayerID)
             {
-                PerformActionOnClick(hit.collider.gameObject);
+                PerformActionOnClick(col.gameObject);
+                return;
             }
-            else
+
+            // check for collisions with equipment elements
+            PointerEventData pData = new PointerEventData(EventSystem.current);
+            pData.position = InputManager.Instance.CursorCurrentPosition;
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pData, results);
+
+            int length = results.Count;
+            for(int i = 0; i < length; ++i)
             {
-                PerformActionOnClick(null);
+                if (results[i].gameObject.layer == objectsLayerID && results[i].gameObject != _container.UsableField.gameObject)
+                {
+                    UsableContainerField field = results[i].gameObject.GetComponent<UsableContainerField>();
+                    if (field != null && !field.Container.IsFree)
+                    {
+                        PerformActionOnClick(field.Container.AssociatedObject.gameObject);
+                        return;
+                    }
+                }
             }
+
+            PerformActionOnClick(null);
         }
+    }
+
+    protected void OnClickDownInEquipment(UnityEngine.EventSystems.PointerEventData eventData)
+    {
+        if (!_actionsLocked)
+        {
+            _tempTransform = _container.transform;
+            _container.UsableField.transform.SetParent(_canvasForSelectedUsable.transform, true);
+            _startSlotPosition = _container.UsableField.GetComponent<RectTransform>().position;
+        }
+    }
+
+    protected void OnClickHoldInEquipment(UnityEngine.EventSystems.PointerEventData eventData)
+    {
+        if(!_actionsLocked)
+        {
+            _container.UsableField.GetComponent<RectTransform>().position = eventData.position;
+        }
+    }
+
+    protected System.Collections.IEnumerator OnClickUpReturnToSlotCoroutine(Vector2 startPos, Vector2 targetPos, float timeSeconds)
+    {
+        float cTime = Time.time;
+        _container.UsableField.GetComponent<RectTransform>().position = startPos;
+
+        while (Time.time - cTime <= timeSeconds)
+        {
+            float lerpValue = (Time.time - cTime) / timeSeconds;
+            Vector2 finalPos = Vector2.Lerp(startPos, targetPos, lerpValue);
+            _container.UsableField.GetComponent<RectTransform>().position = finalPos;
+            yield return null;
+        }
+        _container.UsableField.GetComponent<RectTransform>().position = targetPos;
+        _actionsLocked = false;
+        _container.UsableField.transform.SetParent(_tempTransform, true);
+
+        yield return null;
     }
 
     protected virtual void PerformActionOnClick(GameObject other)

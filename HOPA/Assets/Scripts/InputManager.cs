@@ -33,6 +33,12 @@ public class InputManager : Singleton<InputManager>
 
     #endregion
 
+    #region properties
+
+    public Vector2 CursorCurrentPosition { get; private set; }
+
+    #endregion
+
     #region private
 
     private Vector2 _cursorPrevPosition;
@@ -57,7 +63,9 @@ public class InputManager : Singleton<InputManager>
         }
 
         _cursorPrevPosition = new Vector2();
-	}
+        CursorCurrentPosition = _cursorPrevPosition;
+
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -70,6 +78,8 @@ public class InputManager : Singleton<InputManager>
 
             if(Input.touchCount == 1)
             {
+                CursorCurrentPosition = cTouch1.position;
+
                 // ClickUp
                 if (cTouch1.phase == TouchPhase.Ended && OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled)
                 {
@@ -144,6 +154,8 @@ public class InputManager : Singleton<InputManager>
         // code for editor or PC test input
         else
         {
+            CursorCurrentPosition = Input.mousePosition;
+
             // ClickUp
             if(Input.GetMouseButtonUp(0) && OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled)
             {
@@ -199,13 +211,8 @@ public class InputManager : Singleton<InputManager>
         }
     }
 
-    private Collider2D GetCollider2DUnderCursor()
+    public RaycastHit2D[] GetRaycastHitsUnderCursor()
     {
-        for(int i = 0; i < _sLayerCount; ++i)
-        {
-            _sortLayerList[i].Value.Clear();
-        }
-
         Vector3 clickPos;
         if (Application.isMobilePlatform)
         {
@@ -216,7 +223,17 @@ public class InputManager : Singleton<InputManager>
             clickPos = Input.mousePosition;
         }
         clickPos = Camera.main.ScreenToWorldPoint(clickPos);
-        RaycastHit2D[] hits = Physics2D.RaycastAll(clickPos, clickPos, 0.01f);
+        return Physics2D.RaycastAll(clickPos, clickPos, 0.01f);
+    }
+
+    public Collider2D GetCollider2DUnderCursor()
+    {
+        for(int i = 0; i < _sLayerCount; ++i)
+        {
+            _sortLayerList[i].Value.Clear();
+        }
+
+        RaycastHit2D[] hits = GetRaycastHitsUnderCursor();
         int hitCount = hits.Length;
 
         for(int i = 0; i < hitCount; ++i)
