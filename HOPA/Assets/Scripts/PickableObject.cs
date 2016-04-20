@@ -38,7 +38,7 @@ public class PickableObject : MonoBehaviour
 	
 	}
 
-    protected virtual void PickUp(Vector2 position, Collider col)
+    protected virtual void PickUp(Vector2 position, Collider2D col)
     {
         if (col != null && col.gameObject == this.gameObject)
         {

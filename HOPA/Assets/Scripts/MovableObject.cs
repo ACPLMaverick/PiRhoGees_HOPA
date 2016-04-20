@@ -52,7 +52,7 @@ public class MovableObject : MonoBehaviour
 	
 	}
 
-    private void MoveObject(Vector2 screenPos, Vector2 direction, Collider hitCollider)
+    private void MoveObject(Vector2 screenPos, Vector2 direction, Collider2D hitCollider)
     {
         if(hitCollider != null && hitCollider.gameObject == _item)
         {

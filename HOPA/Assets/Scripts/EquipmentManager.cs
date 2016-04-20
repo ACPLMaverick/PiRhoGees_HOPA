@@ -16,6 +16,11 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     #endregion
 
+    #region constants
+
+
+    #endregion
+
     #region public
 
     public RectTransform PanelPickableList;
@@ -98,6 +103,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     {
         yield return new WaitForSeconds(lagSeconds);
 
+        obj.gameObject.transform.SetParent(Camera.main.transform, true);
         Vector2 firstPos = PanelUsableList.position;
         firstPos.x -= PanelUsableList.rect.width * 0.5f - obj.GetComponent<SpriteRenderer>().sprite.rect.width * 0.8f;
         Vector3 firstPosWorld = Camera.main.ScreenToWorldPoint(new Vector3(firstPos.x, firstPos.y, 0.0f));
@@ -132,8 +138,8 @@ public class EquipmentManager : Singleton<EquipmentManager>
         List<PickableObject> pickablesOnLevel = GameManager.Instance.CurrentRoom.PickableObjects;
 
         Vector2 firstPos = PanelPickableList.position;
-        firstPos.x -= PanelPickableList.rect.width * 0.5f * PanelPickableList.localScale.x + PanelPickableList.offsetMax.x;
-        firstPos.y += PanelPickableList.rect.height * 0.5f * PanelPickableList.localScale.y - 10.0f;
+        firstPos.x -= PanelPickableList.rect.width * 0.5f;
+        firstPos.y += PanelPickableList.rect.height * 0.5f - 10.0f;
         int i = 0;
         Vector2 nextPos = firstPos;
         foreach(PickableObject obj in pickablesOnLevel)
@@ -171,7 +177,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
             PanelPickableList.gameObject.SetActive(true);
             PanelUsableList.gameObject.SetActive(false);
 
-            foreach(PickableObject obj in usableList)
+            foreach (PickableObject obj in usableList)
             {
                 obj.gameObject.SetActive(false);
             }

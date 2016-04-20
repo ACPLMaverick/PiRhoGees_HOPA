@@ -39,9 +39,16 @@ public class Map : PickableUsableObject
 
         for(int i = 0; i < count; ++i)
         {
-            MapButton mp = buttons[i].gameObject.GetComponent<MapButton>();
-            _buttons.Add(buttons[i], mp);
-            mp.ClickedEvent.AddListener(new UnityAction<MapButton>(OnMapButtonClick));
+            if(buttons[i].name.Contains("MapButtonLoc"))
+            {
+                MapButton mp = buttons[i].gameObject.GetComponent<MapButton>();
+                _buttons.Add(buttons[i], mp);
+                mp.ClickedEvent.AddListener(new UnityAction<MapButton>(OnMapButtonClick));
+            }
+            else if(buttons[i].name.Contains("MapButtonBack"))
+            {
+                buttons[i].onClick.AddListener(new UnityAction(HideMap));
+            }
         }
         MapObject.gameObject.SetActive(false);
         _mapCanvasGroup.alpha = 0.0f;
@@ -69,6 +76,7 @@ public class Map : PickableUsableObject
         StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
         MapObject.gameObject.SetActive(true);
         AudioManager.Instance.PlayClip(SoundUnfold, 0.0f);
+        InputManager.Instance.InputAllEventsEnabled = false;
     }
 
     protected void HideMap()
@@ -93,12 +101,18 @@ public class Map : PickableUsableObject
         _mapCanvasGroup.alpha = targetOpacity;
         MapObject.gameObject.SetActive(isUsableOnFinal);
         _isEnabled = isUsableOnFinal;
+
+        if(!_isEnabled)
+        {
+            InputManager.Instance.InputAllEventsEnabled = true;
+        }
+
         yield return null;
     }
 
     protected override void PerformActionOnClick(GameObject other)
     {
-        if(other == null)
+        if(other == null || other == gameObject)
         {
             if(_isEnabled)
             {
@@ -108,6 +122,10 @@ public class Map : PickableUsableObject
             {
                 ShowMap();
             }
+        }
+        else
+        {
+            Debug.Log(other.name);
         }
     }
 

@@ -46,17 +46,15 @@ public class PickableUsableObject : PickableObject
         base.Update();
 	}
 
-    protected override void PickUp(Vector2 position, Collider col)
+    protected override void PickUp(Vector2 position, Collider2D col)
     {
         if (col != null && col.gameObject == this.gameObject)
         {
             Vector3 tgt = Vector3.zero, scl = Vector3.zero;
-            col.gameObject.transform.SetParent(Camera.main.transform, true);
 
             if (EquipmentManager.Instance.CurrentMode == EquipmentManager.EquipmentMode.USABLES)
             {
                 tgt = Camera.main.ScreenToWorldPoint(EquipmentManager.Instance.PanelPickableList.transform.position);
-                scl = Vector3.one;
             }
             else
             {
@@ -90,12 +88,11 @@ public class PickableUsableObject : PickableObject
         IsInEquipment = true;
     }
 
-    protected void OnClickInEquipment(Vector2 screenPos, Collider hitCollider)
+    protected void OnClickInEquipment(Vector2 screenPos, Collider2D hitCollider)
     {
         if(hitCollider != null && hitCollider.gameObject == this.gameObject && IsInEquipment)
         {
-            RaycastHit hit;
-            Physics.Raycast(gameObject.transform.position, Vector3.forward, out hit, 20.0f);
+            RaycastHit2D hit = Physics2D.Raycast(gameObject.transform.position, Vector3.forward, 0.01f);
 
             if(hit.collider != null && (hit.collider.gameObject.tag == "Usable" || hit.collider.gameObject.tag == "PickableUsable"))
             {

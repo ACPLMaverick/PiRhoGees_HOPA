@@ -73,7 +73,7 @@ public class CameraManager : Singleton<CameraManager>
         _bMax = new Vector2(max4.x, max4.y);
     }
 
-    private void MoveCamera(Vector2 origin, Vector2 direction, Collider hitCollider)
+    private void MoveCamera(Vector2 origin, Vector2 direction, Collider2D hitCollider)
     {
         //Debug.Log(origin);
         //Debug.Log(direction);
@@ -119,7 +119,7 @@ public class CameraManager : Singleton<CameraManager>
 
     private void FixCameraZoomBoundaries()
     {
-        uint trials = 1000;
+        uint trials = 10000;
         float step = 0.001f;
         for(uint i = 0; i < trials; ++i)
         {
