@@ -93,18 +93,10 @@ public class PickableUsableObject : PickableObject
 
     protected override void FinishedFlying()
     {
-        if (EquipmentManager.Instance.CurrentMode == EquipmentManager.EquipmentMode.USABLES)
-        {
-            gameObject.SetActive(true);
-        }
-        else
-        {
-            gameObject.SetActive(false);
-        }
         IsInEquipment = true;
     }
 
-    protected void OnClickUpInEquipment(UnityEngine.EventSystems.PointerEventData eventData)
+    protected void OnClickUpInEquipment(PointerEventData eventData)
     {
         if (!_actionsLocked)
         {
@@ -144,7 +136,7 @@ public class PickableUsableObject : PickableObject
         }
     }
 
-    protected void OnClickDownInEquipment(UnityEngine.EventSystems.PointerEventData eventData)
+    protected void OnClickDownInEquipment(PointerEventData eventData)
     {
         if (!_actionsLocked)
         {
@@ -154,7 +146,7 @@ public class PickableUsableObject : PickableObject
         }
     }
 
-    protected void OnClickHoldInEquipment(UnityEngine.EventSystems.PointerEventData eventData)
+    protected void OnClickHoldInEquipment(PointerEventData eventData)
     {
         if(!_actionsLocked)
         {

@@ -9,6 +9,7 @@ public class CameraManager : Singleton<CameraManager>
 
     #region public
 
+    public bool Enabled = true;
     public Camera CameraControlled = null;
     public float CameraMovementRate = 1.0f;
     public float CameraZoomRate = 0.1f;
@@ -80,7 +81,7 @@ public class CameraManager : Singleton<CameraManager>
 
         // check if we point the background or other object
         // we hit other object or nothing - return
-        if (hitCollider == null || hitCollider.gameObject != GameManager.Instance.CurrentRoom.gameObject)
+        if (hitCollider == null || hitCollider.gameObject != GameManager.Instance.CurrentRoom.gameObject || !Enabled)
         {
             return;
         }
@@ -96,6 +97,11 @@ public class CameraManager : Singleton<CameraManager>
 
     private void ZoomCamera(float amount)
     {
+        if(!Enabled)
+        {
+            return;
+        }
+
         CameraControlled.orthographicSize = Mathf.Clamp(CameraControlled.orthographicSize + amount * CameraZoomRate, CameraZoomMin, CameraZoomMax);
 
         FixCameraZoomBoundaries();

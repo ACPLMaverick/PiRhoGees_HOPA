@@ -3,11 +3,23 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
+public class RoomUnityEvent : UnityEvent<Room> { };
+
 public class Room : MonoBehaviour
 {
     #region events
 
-    public UnityEvent AllPickableObjectsCollectedEvent;
+    public RoomUnityEvent AllPickableObjectsCollectedEvent;
+
+    #endregion
+
+    #region public
+
+    public Room NextRoom = null;
+    // public Message NextMessage;
+    public bool Locked = false;
+    public bool CameraEnabled = true;
+    public MapButton AssociatedMapButton;
 
     #endregion
 
@@ -23,7 +35,7 @@ public class Room : MonoBehaviour
     {
         // gather all pickableobjects in a room 
 
-        AllPickableObjectsCollectedEvent = new UnityEvent();
+        AllPickableObjectsCollectedEvent = new RoomUnityEvent();
 
         PickableObjects = new List<PickableObject>();
         PickablePickedObjects = new List<PickableObject>();
@@ -47,7 +59,10 @@ public class Room : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-
+        if(Locked)
+        {
+            AssociatedMapButton.Lock();
+        }
     }
 	
 	// Update is called once per frame
@@ -65,7 +80,7 @@ public class Room : MonoBehaviour
 
             if(PickableObjects.Count == PickablePickedObjects.Count)
             {
-                AllPickableObjectsCollectedEvent.Invoke();
+                AllPickableObjectsCollectedEvent.Invoke(this);
             }
         }
         else if (obj.GetType() == typeof(PickableUsableObject))
@@ -73,5 +88,10 @@ public class Room : MonoBehaviour
             PickableUsableObjects.Remove((PickableUsableObject)obj);
         }
         
+    }
+
+    public void UnlockMapButton()
+    {
+        AssociatedMapButton.Unlock();
     }
 }

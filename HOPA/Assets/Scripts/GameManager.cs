@@ -10,6 +10,7 @@ public class GameManager : Singleton<GameManager>
     public Room CurrentRoom;
     public List<Room> RoomsInGame;
     public Image FadeImage;
+    public Text ClearedText;
     public float RoomTransitionTime = 2.0f;
 
     #endregion
@@ -27,10 +28,13 @@ public class GameManager : Singleton<GameManager>
 
         foreach(Room r in RoomsInGame)
         {
-            r.AllPickableObjectsCollectedEvent.AddListener(new UnityEngine.Events.UnityAction(OnRoomCommonPickablesCollected));
+            r.AllPickableObjectsCollectedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
         }
 
-        RoomsInGame[0].AllPickableObjectsCollectedEvent.AddListener(new UnityEngine.Events.UnityAction(OnRoom0PickablesCollected));
+        //RoomsInGame[0].AllPickableObjectsCollectedEvent.AddListener(new UnityEngine.Events.UnityAction(OnRoom0PickablesCollected));
+
+        ClearedText.GetComponent<CanvasGroup>().alpha = 0.0f;
+        ClearedText.gameObject.SetActive(false);
 	}
 	
 	// Update is called once per frame
@@ -84,17 +88,93 @@ public class GameManager : Singleton<GameManager>
         _nextRoom = null;
 
         CameraManager.Instance.RecalculateToCurrentRoom();
+        CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
         EquipmentManager.Instance.FlushOnNextRoom();
         StartCoroutine(EndMoveCoroutine());
     }
 
-    private void OnRoomCommonPickablesCollected()
+    private void OnRoomCommonPickablesCollected(Room r)
     {
-        Debug.Log("ALL PICKABLES IN CURRENT ROOM COLLECTED!");
+        StartCoroutine(ClearedTextCoroutine(r));
     }
 
-    private void OnRoom0PickablesCollected()
+    //private void OnRoom0PickablesCollected()
+    //{
+    //    StartCoroutine(OnRoom0PickablesCollectedCoroutine());
+    //}
+
+    private IEnumerator ClearedTextCoroutine(Room r)
     {
-        Debug.Log("All pickables in Room 0 collected.");
+        ClearedText.gameObject.SetActive(true);
+        RectTransform rt = ClearedText.GetComponent<RectTransform>();
+        CanvasGroup cg = ClearedText.GetComponent<CanvasGroup>();
+        Vector2 startScale = new Vector2(0.5f, 0.5f);
+        float startAlpha = 0.0f;
+        Vector2 targetScale = new Vector2(1.0f, 1.0f);
+        float targetAlpha = 1.0f;
+        float timeSecondsWait = 1.5f;
+        float timeSecondsIn = 3.0f;
+        float timeSecondsStay = 3.0f;
+        float timeSecondsOut = 1.2f;
+
+        yield return new WaitForSeconds(timeSecondsWait);
+
+        float cTime = Time.time;
+
+        while (Time.time - cTime <= timeSecondsIn)
+        {
+            float lerpValue = (Time.time - cTime) / timeSecondsIn;
+
+            Vector2 finalScale = Vector2.Lerp(startScale, targetScale, lerpValue);
+            float finalAlpha = Mathf.Lerp(startAlpha, targetAlpha, lerpValue);
+
+            rt.localScale = finalScale;
+            cg.alpha = finalAlpha;
+
+            yield return null;
+        }
+        rt.localScale = targetScale;
+        cg.alpha = targetAlpha;
+
+        yield return new WaitForSeconds(timeSecondsStay);
+
+        cTime = Time.time;
+
+        while (Time.time - cTime <= timeSecondsOut)
+        {
+            float lerpValue = (Time.time - cTime) / timeSecondsOut;
+
+            Vector2 finalScale = Vector2.Lerp(targetScale, startScale, lerpValue);
+            float finalAlpha = Mathf.Lerp(targetAlpha, startAlpha, lerpValue);
+
+            rt.localScale = finalScale;
+            cg.alpha = finalAlpha;
+
+            yield return null;
+        }
+        rt.localScale = startScale;
+        cg.alpha = startAlpha;
+        ClearedText.gameObject.SetActive(false);
+
+        if (r.NextRoom != null)
+        {
+            if(r.NextRoom.Locked)
+            {
+                r.NextRoom.Locked = false;
+                r.NextRoom.UnlockMapButton();
+            }
+            TransitionToRoom(r.NextRoom);
+        }
+        else
+        {
+            EquipmentManager.Instance.OpenMapArbitrarily();
+        }
+
+        yield return null;
     }
+
+    //private IEnumerator OnRoom0PickablesCollectedCoroutine()
+    //{
+    //    yield return new WaitForSeconds(4.0f);
+    //}
 }

@@ -249,15 +249,15 @@ public class Map : PickableUsableObject
         }
     }
 
-    protected void ShowMap()
+    public void ShowMap()
     {
-        StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
         MapObject.gameObject.SetActive(true);
+        StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
         AudioManager.Instance.PlayClip(SoundUnfold, 0.0f);
         InputManager.Instance.InputAllEventsEnabled = false;
     }
 
-    protected void HideMap()
+    public void HideMap()
     {
         StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, false));
         _isEnabled = false;

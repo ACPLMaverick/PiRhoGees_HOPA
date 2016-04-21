@@ -42,5 +42,15 @@ public class MapButton : MonoBehaviour
         }
     }
 
+    public void Lock()
+    {
+        GetComponent<Button>().interactable = false;
+    }
+
+    public void Unlock()
+    {
+        GetComponent<Button>().interactable = true;
+    }
+
     #endregion
 }

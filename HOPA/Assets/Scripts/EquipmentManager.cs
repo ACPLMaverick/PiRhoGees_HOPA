@@ -55,6 +55,8 @@ public class EquipmentManager : Singleton<EquipmentManager>
     private UsableContainer[] _usableContainers;
     private int _usableContainersOccupiedCount = 0;
 
+    private Map _map;
+
     #endregion
 
     #region functions
@@ -91,6 +93,11 @@ public class EquipmentManager : Singleton<EquipmentManager>
             return;
         }
 
+        if(obj.GetComponent<Map>() != null)
+        {
+            _map = obj.GetComponent<Map>();
+        }
+
         StartCoroutine(AddObjectToPoolCoroutine(obj, lagSeconds));
 
         obj.gameObject.layer = LayerMask.NameToLayer("UI");
@@ -115,6 +122,18 @@ public class EquipmentManager : Singleton<EquipmentManager>
         }
 
         StartGUIPickables();
+    }
+
+    public void OpenMapArbitrarily()
+    {
+        if(_map != null)
+        {
+            if(CurrentMode == EquipmentMode.PICKABLES)
+            {
+                SwitchPanel();
+            }
+            _map.ShowMap();
+        }
     }
 
     private IEnumerator AddObjectToPoolCoroutine(PickableUsableObject obj, float lagSeconds)
@@ -229,21 +248,11 @@ public class EquipmentManager : Singleton<EquipmentManager>
         {
             PanelPickableList.gameObject.SetActive(true);
             PanelUsableList.gameObject.SetActive(false);
-
-            foreach (PickableObject obj in _usableList)
-            {
-                obj.gameObject.SetActive(false);
-            }
         }
         else if(CurrentMode == EquipmentMode.USABLES)
         {
             PanelPickableList.gameObject.SetActive(false);
             PanelUsableList.gameObject.SetActive(true);
-
-            foreach (PickableObject obj in _usableList)
-            {
-                obj.gameObject.SetActive(true);
-            }
         }
     }
 
