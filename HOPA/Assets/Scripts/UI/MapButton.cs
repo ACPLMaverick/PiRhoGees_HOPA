@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
+using UnityEngine.UI;
 
 public class MapButtonEvent : UnityEvent<MapButton> { };
 
@@ -18,6 +19,7 @@ public class MapButton : MonoBehaviour
     protected virtual void Awake()
     {
         ClickedEvent = new MapButtonEvent();
+        GetComponent<Button>().onClick.AddListener(new UnityAction(OnClick));
     }
 
     // Use this for initialization
