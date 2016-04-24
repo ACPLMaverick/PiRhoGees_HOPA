@@ -6,6 +6,7 @@ public class AudioManager : Singleton<AudioManager>
     #region public
 
     public AudioSource MainAudioSource;
+    public bool IsAudioMuted;
 
     #endregion
 
@@ -27,6 +28,20 @@ public class AudioManager : Singleton<AudioManager>
     {
         MainAudioSource.clip = clip;
         MainAudioSource.PlayDelayed(delaySeconds);
+    }
+
+    public void ToggleMute()
+    {
+        if(IsAudioMuted)
+        {
+            MainAudioSource.mute = false;
+            IsAudioMuted = false;
+        }
+        else
+        {
+            MainAudioSource.mute = true;
+            IsAudioMuted = true;
+        }
     }
 
     #endregion

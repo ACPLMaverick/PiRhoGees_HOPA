@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class FormUIManager : MonoBehaviour {
 
@@ -14,19 +15,27 @@ public class FormUIManager : MonoBehaviour {
     #endregion
 
     #region public
+    public Image LocationBackground;
+    public Sprite LocationBackgroundReplacement;
+
+    public Image FormBackgroundImage;
     public Text FormHeaderText;
     public InputField FirstNameInput;
     public Toggle MaleToggle;
     public Toggle FemaleToggle;
     public Button ProceedButton;
 
+    public Button LetterButton;
+    public Button LetterBackground;
     public Text LetterHeaderText;
     public Text LetterContextText;
+    public Text LetterSecondSideContextText;
     #endregion
 
     #region private
     private string _firstName;
     private string _gender;
+    private bool _isLetterTurned;
     #endregion
 
     #region functions
@@ -67,7 +76,8 @@ public class FormUIManager : MonoBehaviour {
     {
         string tmp = "";
 
-        TurnOffForm();
+        //TurnOffForm();
+        LetterBackground.gameObject.SetActive(true);
 
         LetterHeaderText.gameObject.SetActive(true);
         switch (gender)
@@ -96,6 +106,7 @@ public class FormUIManager : MonoBehaviour {
 
     public void TurnOffForm()
     {
+        FormBackgroundImage.gameObject.SetActive(false);
         FormHeaderText.gameObject.SetActive(false);
         FirstNameInput.gameObject.SetActive(false);
         MaleToggle.gameObject.SetActive(false);
@@ -139,7 +150,30 @@ public class FormUIManager : MonoBehaviour {
         PlayerPrefs.SetString("FirstName", _firstName);
         PlayerPrefs.SetString("Gender", _gender);
 
+        LocationBackground.sprite = LocationBackgroundReplacement;
+        LetterButton.interactable = true;
+        TurnOffForm();
+    }
+
+    public void OnLetterButtonClick()
+    {
         ShowLetter(PlayerPrefs.GetString("Gender"));
+    }
+
+    public void OnLetterBackgroundClick()
+    {
+        if (!_isLetterTurned)
+        {
+            LetterHeaderText.gameObject.SetActive(false);
+            LetterContextText.gameObject.SetActive(false);
+            LetterBackground.transform.localScale = new Vector3(-1, 1, 1);
+            LetterSecondSideContextText.gameObject.SetActive(true);
+            _isLetterTurned = true;
+        }
+        else
+        {
+            SceneManager.LoadScene(2);
+        }
     }
     #endregion
 }
