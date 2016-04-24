@@ -1,16 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System;
+using UnityEditorInternal;
+using System.Reflection;
 
 public class InputManager : Singleton<InputManager>
 {
 
     #region public
 
-    public delegate void InputClickUpEvent(Vector2 screenPos, Collider hitCollider);
-    public delegate void InputClickDownEvent(Vector2 screenPos, Collider hitCollider);
-    public delegate void InputHoldEvent(Vector2 screenPos, Collider hitCollider);
+    public delegate void InputClickUpEvent(Vector2 screenPos, Collider2D hitCollider2D);
+    public delegate void InputClickDownEvent(Vector2 screenPos, Collider2D hitCollider2D);
+    public delegate void InputHoldEvent(Vector2 screenPos, Collider2D hitCollider2D);
     public delegate void InputZoomEvent(float amount);
-    public delegate void InputMoveEvent(Vector2 currentScreenPos, Vector2 direction, Collider hitCollider);
+    public delegate void InputMoveEvent(Vector2 currentScreenPos, Vector2 direction, Collider2D hitCollider2D);
 
     public static event InputClickUpEvent OnInputClickUp;
     public static event InputClickDownEvent OnInputClickDown;
@@ -19,13 +23,29 @@ public class InputManager : Singleton<InputManager>
     public static event InputMoveEvent OnInputMove;
     public static event InputMoveEvent OnInputMoveExclusive;
 
+    public bool InputAllEventsEnabled = true;
+    public bool InputClickUpEventsEnabled = true;
+    public bool InputClickDownEventsEnabled = true;
+    public bool InputHoldEventsEnabled = true;
+    public bool InputZoomEventsEnabled = true;
+    public bool InputMoveEventsEnabled = true;
+    public bool InputMoveEventsExclusiveEnabled = true;
+
+    #endregion
+
+    #region properties
+
+    public Vector2 CursorCurrentPosition { get; private set; }
+
     #endregion
 
     #region private
 
     private Vector2 _cursorPrevPosition;
     private bool _canInvokeMoveExclusive = false;
-    private Collider _invokeMoveExclusiveColliderHelper = null;
+    private Collider2D _invokeMoveExclusiveCollider2DHelper = null;
+    private KeyValuePair<int, SortedList<int, Collider2D>>[] _sortLayerList;
+    private int _sLayerCount;
 
     #endregion
 
@@ -34,8 +54,18 @@ public class InputManager : Singleton<InputManager>
     // Use this for initialization
     void Start ()
     {
+        int[] sLayers = GetSortingLayerUniqueIDs();
+        _sLayerCount = sLayers.Length;
+        _sortLayerList = new KeyValuePair<int, SortedList<int, Collider2D>>[_sLayerCount];
+        for(int i = 0; i < _sLayerCount; ++i)
+        {
+            _sortLayerList[i] = new KeyValuePair<int, SortedList<int, Collider2D>>(sLayers[i], new SortedList<int, Collider2D>());
+        }
+
         _cursorPrevPosition = new Vector2();
-	}
+        CursorCurrentPosition = _cursorPrevPosition;
+
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -48,50 +78,52 @@ public class InputManager : Singleton<InputManager>
 
             if(Input.touchCount == 1)
             {
+                CursorCurrentPosition = cTouch1.position;
+
                 // ClickUp
-                if (cTouch1.phase == TouchPhase.Ended && OnInputClickUp != null)
+                if (cTouch1.phase == TouchPhase.Ended && OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled)
                 {
-                    OnInputClickUp(cTouch1.position, GetColliderUnderCursor());
+                    OnInputClickUp(cTouch1.position, GetCollider2DUnderCursor());
 
                     if(_canInvokeMoveExclusive)
                     {
                         _canInvokeMoveExclusive = false;
-                        _invokeMoveExclusiveColliderHelper = null;
+                        _invokeMoveExclusiveCollider2DHelper = null;
                     }
                 }
 
                 // ClickDown
-                if (cTouch1.phase == TouchPhase.Began && OnInputClickDown != null)
+                if (cTouch1.phase == TouchPhase.Began && OnInputClickDown != null && InputClickDownEventsEnabled && InputAllEventsEnabled)
                 {
-                    OnInputClickDown(cTouch1.position, GetColliderUnderCursor());
+                    OnInputClickDown(cTouch1.position, GetCollider2DUnderCursor());
                 }
 
                 // hold
-                if (cTouch1.phase == TouchPhase.Stationary && OnInputHold != null)
+                if (cTouch1.phase == TouchPhase.Stationary && OnInputHold != null && InputHoldEventsEnabled && InputAllEventsEnabled)
                 {
-                    OnInputHold(cTouch1.position, GetColliderUnderCursor());
+                    OnInputHold(cTouch1.position, GetCollider2DUnderCursor());
                 }
 
                 // move
-                if (cTouch1.phase == TouchPhase.Moved)
+                if (cTouch1.phase == TouchPhase.Moved && InputMoveEventsEnabled && InputAllEventsEnabled)
                 {
-                    Collider uc = GetColliderUnderCursor();
+                    Collider2D uc = GetCollider2DUnderCursor();
                     if(OnInputMove != null) OnInputMove(cTouch1.position, cTouch1.position - _cursorPrevPosition, uc);
 
                     if(!_canInvokeMoveExclusive)
                     {
                         _canInvokeMoveExclusive = true;
-                        _invokeMoveExclusiveColliderHelper = uc;
+                        _invokeMoveExclusiveCollider2DHelper = uc;
                     }
                     else
                     {
-                        if(OnInputMoveExclusive != null) OnInputMoveExclusive(cTouch1.position, cTouch1.position - _cursorPrevPosition, _invokeMoveExclusiveColliderHelper);
+                        if(OnInputMoveExclusive != null && InputMoveEventsExclusiveEnabled && InputAllEventsEnabled) OnInputMoveExclusive(cTouch1.position, cTouch1.position - _cursorPrevPosition, _invokeMoveExclusiveCollider2DHelper);
                     }
                 }
             }
 
             // zoom
-            if (cTouch1.phase == TouchPhase.Moved && cTouch2.phase == TouchPhase.Moved && OnInputZoom != null && Input.touchCount == 2)
+            if (cTouch1.phase == TouchPhase.Moved && cTouch2.phase == TouchPhase.Moved && OnInputZoom != null && Input.touchCount == 2 && InputZoomEventsEnabled && InputAllEventsEnabled)
             {
                 // pinch gesture
                 // Two touch positions with given directions are in fact two rays. Checking if the rays intersect (zoom in) or not (zoom out)
@@ -122,38 +154,40 @@ public class InputManager : Singleton<InputManager>
         // code for editor or PC test input
         else
         {
+            CursorCurrentPosition = Input.mousePosition;
+
             // ClickUp
-            if(Input.GetMouseButtonUp(0) && OnInputClickUp != null)
+            if(Input.GetMouseButtonUp(0) && OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled)
             {
-                OnInputClickUp(Input.mousePosition, GetColliderUnderCursor());
+                OnInputClickUp(Input.mousePosition, GetCollider2DUnderCursor());
             }
 
             // ClickDown
-            if (Input.GetMouseButtonDown(0) && OnInputClickDown != null)
+            if (Input.GetMouseButtonDown(0) && OnInputClickDown != null && InputClickDownEventsEnabled && InputAllEventsEnabled)
             {
-                OnInputClickDown(Input.mousePosition, GetColliderUnderCursor());
+                OnInputClickDown(Input.mousePosition, GetCollider2DUnderCursor());
             }
 
             // hold
-            if (Input.GetMouseButton(0) && OnInputHold != null)
+            if (Input.GetMouseButton(0) && OnInputHold != null && InputHoldEventsEnabled && InputAllEventsEnabled)
             {
-                OnInputHold(Input.mousePosition, GetColliderUnderCursor());
+                OnInputHold(Input.mousePosition, GetCollider2DUnderCursor());
             }
 
             // move
-            if(Input.GetMouseButton(1) && _cursorPrevPosition != new Vector2(Input.mousePosition.x, Input.mousePosition.y))
+            if(Input.GetMouseButton(1) && _cursorPrevPosition != new Vector2(Input.mousePosition.x, Input.mousePosition.y) && InputMoveEventsEnabled && InputAllEventsEnabled)
             {
-                Collider uc = GetColliderUnderCursor();
+                Collider2D uc = GetCollider2DUnderCursor();
                 if(OnInputMove != null) OnInputMove(Input.mousePosition, new Vector2(Input.mousePosition.x, Input.mousePosition.y) - _cursorPrevPosition, uc);
 
                 if (!_canInvokeMoveExclusive)
                 {
                     _canInvokeMoveExclusive = true;
-                    _invokeMoveExclusiveColliderHelper = uc;
+                    _invokeMoveExclusiveCollider2DHelper = uc;
                 }
                 else
                 {
-                    if (OnInputMoveExclusive != null) OnInputMoveExclusive(Input.mousePosition, new Vector2(Input.mousePosition.x, Input.mousePosition.y) - _cursorPrevPosition, _invokeMoveExclusiveColliderHelper);
+                    if (OnInputMoveExclusive != null && InputMoveEventsExclusiveEnabled && InputAllEventsEnabled) OnInputMoveExclusive(Input.mousePosition, new Vector2(Input.mousePosition.x, Input.mousePosition.y) - _cursorPrevPosition, _invokeMoveExclusiveCollider2DHelper);
                 }
             }
 
@@ -163,12 +197,12 @@ public class InputManager : Singleton<InputManager>
                 if (_canInvokeMoveExclusive)
                 {
                     _canInvokeMoveExclusive = false;
-                    _invokeMoveExclusiveColliderHelper = null;
+                    _invokeMoveExclusiveCollider2DHelper = null;
                 }
             }
 
             // zoom
-            if (Input.mouseScrollDelta.y != 0.0f && OnInputZoom != null)
+            if (Input.mouseScrollDelta.y != 0.0f && OnInputZoom != null && InputZoomEventsEnabled && InputAllEventsEnabled)
             {
                 OnInputZoom(-Input.mouseScrollDelta.y);
             }
@@ -177,7 +211,7 @@ public class InputManager : Singleton<InputManager>
         }
     }
 
-    private Collider GetColliderUnderCursor()
+    public RaycastHit2D[] GetRaycastHitsUnderCursor()
     {
         Vector3 clickPos;
         if (Application.isMobilePlatform)
@@ -189,10 +223,63 @@ public class InputManager : Singleton<InputManager>
             clickPos = Input.mousePosition;
         }
         clickPos = Camera.main.ScreenToWorldPoint(clickPos);
-        RaycastHit hit;
-        Physics.Raycast(new Ray(clickPos, new Vector3(0.0f, 0.0f, 1.0f)), out hit);
+        return Physics2D.RaycastAll(clickPos, clickPos, 0.01f);
+    }
 
-        return hit.collider;
+    public Collider2D GetCollider2DUnderCursor()
+    {
+        for(int i = 0; i < _sLayerCount; ++i)
+        {
+            _sortLayerList[i].Value.Clear();
+        }
+
+        RaycastHit2D[] hits = GetRaycastHitsUnderCursor();
+        int hitCount = hits.Length;
+
+        for(int i = 0; i < hitCount; ++i)
+        {
+            int layerID = hits[i].collider.gameObject.GetComponent<SpriteRenderer>().sortingLayerID;
+            int orderInLayer = hits[i].collider.gameObject.GetComponent<SpriteRenderer>().sortingOrder;
+            // find layer the collider's object is on
+            SortedList<int, Collider2D> layer = null;
+            for (int j = 0; j < _sLayerCount; ++j)
+            {
+                if(_sortLayerList[j].Key == layerID)
+                {
+                    layer = _sortLayerList[j].Value;
+                    break;
+                }
+            }
+
+            // add to that layer with given sort order. This will sort automatically.
+            layer.Add(orderInLayer, hits[i].collider);
+        }
+
+        // iterate from the furthest layer and hightest order and pick first object found
+
+        Collider2D highestHit = null;
+        for (int i = _sLayerCount - 1; i > 0; --i)
+        {
+            int mObjectCountOnLayer = _sortLayerList[i].Value.Count;
+
+            if(mObjectCountOnLayer != 0)
+            {
+                highestHit = _sortLayerList[i].Value.Values[mObjectCountOnLayer - 1];
+                break;
+            }
+        }
+
+        //Debug.Log(highestHit.gameObject.name);
+
+        return highestHit;
+    }
+
+    // Get the unique sorting layer IDs -- tossed this in for good measure
+    public int[] GetSortingLayerUniqueIDs()
+    {
+        Type internalEditorUtilityType = typeof(InternalEditorUtility);
+        PropertyInfo sortingLayerUniqueIDsProperty = internalEditorUtilityType.GetProperty("sortingLayerUniqueIDs", BindingFlags.Static | BindingFlags.NonPublic);
+        return (int[])sortingLayerUniqueIDsProperty.GetValue(null, new object[0]);
     }
 
     #endregion
