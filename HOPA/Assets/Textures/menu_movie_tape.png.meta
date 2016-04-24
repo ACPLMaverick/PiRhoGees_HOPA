@@ -1,9 +1,10 @@
 fileFormatVersion: 2
 guid: 5c4d117479a59764c8a5086f8f7c69a7
-timeCreated: 1461167636
-licenseType: Free
+timeCreated: 1461493765
+licenseType: Pro
 TextureImporter:
-  fileIDToRecycleName: {}
+  fileIDToRecycleName:
+    21300000: menu_movie_tape_0
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -30,7 +31,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     filterMode: -1
-    aniso: -1
+    aniso: 16
     mipBias: -1
     wrapMode: 1
   nPOTScale: 0
@@ -38,7 +39,7 @@ TextureImporter:
   rGBM: 0
   compressionQuality: 50
   allowsAlphaSplitting: 0
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -49,7 +50,22 @@ TextureImporter:
   textureType: 8
   buildTargetSettings: []
   spriteSheet:
-    sprites: []
+    sprites:
+    - name: menu_movie_tape_0
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 373
+        width: 823
+        height: 175
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -411.5, y: 87.5}
+        - {x: -411.5, y: -87.5}
+        - {x: 411.5, y: -87.5}
+        - {x: 411.5, y: 87.5}
     outline: []
   spritePackingTag: 
   userData: 
