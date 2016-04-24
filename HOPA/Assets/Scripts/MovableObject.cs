@@ -20,18 +20,18 @@ public class MovableObject : MonoBehaviour
 
     #endregion
 
-    #region private
+    #region protected
 
-    private Transform _tMin = null;
-    private Transform _tMax = null;
-    private GameObject _item = null;
+    protected Transform _tMin = null;
+    protected Transform _tMax = null;
+    protected GameObject _item = null;
 
     #endregion
 
     #region functions
 
     // Use this for initialization
-    void Start ()
+    protected virtual void Start ()
     {
         // finding child objects which are NECESSARY to run the script
         _tMin = transform.FindChild("TransformMin");
@@ -45,9 +45,9 @@ public class MovableObject : MonoBehaviour
 
         InputManager.OnInputMoveExclusive += MoveObject;
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    protected virtual void Update ()
     {
 	
 	}

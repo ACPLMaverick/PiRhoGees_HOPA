@@ -9,8 +9,13 @@ public class MapButton : MonoBehaviour
 {
     #region public
 
-    public Room AssociatedRoom;
     public UnityEvent<MapButton> ClickedEvent;
+
+    #endregion
+
+    #region properties
+
+    public Room AssociatedRoom { get; set; }
 
     #endregion
 

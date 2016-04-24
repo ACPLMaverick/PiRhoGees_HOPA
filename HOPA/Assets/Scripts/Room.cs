@@ -9,7 +9,8 @@ public class Room : MonoBehaviour
 {
     #region events
 
-    public RoomUnityEvent AllPickableObjectsCollectedEvent;
+    public RoomUnityEvent InitializeEvent;
+    public RoomUnityEvent CompletedEvent;
 
     #endregion
 
@@ -31,11 +32,19 @@ public class Room : MonoBehaviour
 
     #endregion
 
+    #region protected
+
+    protected bool _initialized;
+    protected bool _finished;
+
+    #endregion
+
     protected virtual void Awake()
     {
         // gather all pickableobjects in a room 
 
-        AllPickableObjectsCollectedEvent = new RoomUnityEvent();
+        CompletedEvent = new RoomUnityEvent();
+        InitializeEvent = new RoomUnityEvent();
 
         PickableObjects = new List<PickableObject>();
         PickablePickedObjects = new List<PickableObject>();
@@ -54,19 +63,21 @@ public class Room : MonoBehaviour
         }
 
         PickableObject.OnPickedUp += RemoveOnPickup;
+
+        AssociatedMapButton.AssociatedRoom = this;
     }
 
     // Use this for initialization
-    void Start ()
+    protected virtual void Start ()
     {
         if(Locked)
         {
             AssociatedMapButton.Lock();
         }
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    protected virtual void Update ()
     {
 	
 	}
@@ -80,7 +91,7 @@ public class Room : MonoBehaviour
 
             if(PickableObjects.Count == PickablePickedObjects.Count)
             {
-                AllPickableObjectsCollectedEvent.Invoke(this);
+                Finish();
             }
         }
         else if (obj.GetType() == typeof(PickableUsableObject))
@@ -90,8 +101,36 @@ public class Room : MonoBehaviour
         
     }
 
+    public void Initialize()
+    {
+        if(!_initialized)
+        {
+            _initialized = true;
+            OnInitialize();
+        }
+    }
+
+    public void Finish()
+    {
+        if(!_finished)
+        {
+            _finished = true;
+            OnFinished();
+        }
+    }
+
     public void UnlockMapButton()
     {
         AssociatedMapButton.Unlock();
+    }
+
+    protected virtual void OnInitialize()
+    {
+        InitializeEvent.Invoke(this);
+    }
+
+    protected virtual void OnFinished()
+    {
+        CompletedEvent.Invoke(this);
     }
 }

@@ -8,9 +8,17 @@ public class GameManager : Singleton<GameManager>
     #region public
 
     public Room CurrentRoom;
-    public List<Room> RoomsInGame;
+
+    public Room RoomPrologue;
+    public Room RoomFirst;
+    public Room RoomFirstPuzzle;
+    public Room RoomSecond;
+    public Room RoomSecondPuzzle;
+    public Room RoomThirdPuzzle;
+
     public Image FadeImage;
     public Text ClearedText;
+    public Text PuzzleSolvedText;
     public float RoomTransitionTime = 2.0f;
 
     #endregion
@@ -24,17 +32,17 @@ public class GameManager : Singleton<GameManager>
     // Use this for initialization
     void Start ()
     {
-        //RoomsInGame = new List<Room>();
-
-        foreach(Room r in RoomsInGame)
-        {
-            r.AllPickableObjectsCollectedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
-        }
-
-        //RoomsInGame[0].AllPickableObjectsCollectedEvent.AddListener(new UnityEngine.Events.UnityAction(OnRoom0PickablesCollected));
+        RoomFirst.CompletedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
+        RoomFirstPuzzle.CompletedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomAssignPuzzleFinished));
 
         ClearedText.GetComponent<CanvasGroup>().alpha = 0.0f;
         ClearedText.gameObject.SetActive(false);
+
+        PuzzleSolvedText.GetComponent<CanvasGroup>().alpha = 0.0f;
+        PuzzleSolvedText.gameObject.SetActive(false);
+
+        CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
+        CurrentRoom.Initialize();
 	}
 	
 	// Update is called once per frame
@@ -85,7 +93,9 @@ public class GameManager : Singleton<GameManager>
     private void MoveToCurrentRoom()
     {
         CurrentRoom = _nextRoom;
-        _nextRoom = null;
+        _nextRoom = CurrentRoom.NextRoom;
+
+        CurrentRoom.Initialize();
 
         CameraManager.Instance.RecalculateToCurrentRoom();
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
@@ -95,7 +105,12 @@ public class GameManager : Singleton<GameManager>
 
     private void OnRoomCommonPickablesCollected(Room r)
     {
-        StartCoroutine(ClearedTextCoroutine(r));
+        StartCoroutine(RoomFinishedCoroutine(r, ClearedText));
+    }
+
+    private void OnRoomAssignPuzzleFinished(Room r)
+    {
+        StartCoroutine(RoomFinishedCoroutine(r, PuzzleSolvedText));
     }
 
     //private void OnRoom0PickablesCollected()
@@ -103,11 +118,11 @@ public class GameManager : Singleton<GameManager>
     //    StartCoroutine(OnRoom0PickablesCollectedCoroutine());
     //}
 
-    private IEnumerator ClearedTextCoroutine(Room r)
+    private IEnumerator RoomFinishedCoroutine(Room r, Text t)
     {
-        ClearedText.gameObject.SetActive(true);
-        RectTransform rt = ClearedText.GetComponent<RectTransform>();
-        CanvasGroup cg = ClearedText.GetComponent<CanvasGroup>();
+        t.gameObject.SetActive(true);
+        RectTransform rt = t.GetComponent<RectTransform>();
+        CanvasGroup cg = t.GetComponent<CanvasGroup>();
         Vector2 startScale = new Vector2(0.5f, 0.5f);
         float startAlpha = 0.0f;
         Vector2 targetScale = new Vector2(1.0f, 1.0f);
@@ -154,7 +169,9 @@ public class GameManager : Singleton<GameManager>
         }
         rt.localScale = startScale;
         cg.alpha = startAlpha;
-        ClearedText.gameObject.SetActive(false);
+        t.gameObject.SetActive(false);
+
+        r.Finish();
 
         if (r.NextRoom != null)
         {

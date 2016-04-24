@@ -38,6 +38,8 @@ public class CameraManager : Singleton<CameraManager>
 
         InputManager.OnInputMoveExclusive += MoveCamera;
         InputManager.OnInputZoom += ZoomCamera;
+
+        RecalculateToCurrentRoom();
     }
 	
 	// Update is called once per frame

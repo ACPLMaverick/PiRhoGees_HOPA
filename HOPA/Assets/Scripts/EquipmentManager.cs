@@ -34,18 +34,67 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     #region properties
 
-    public EquipmentMode CurrentMode { get; private set; }
-    private bool EquipmentFreeContainersAvailable
+    public EquipmentMode CurrentMode
+    {
+        get
+        {
+            return _currentMode;
+        }
+        set
+        {
+            if(_currentMode != value)
+            {
+                SwitchPanel();
+            }
+            _currentMode = value;
+        }
+    }
+    public bool EquipmentFreeContainersAvailable
     {
         get
         {
             return _usableContainersOccupiedCount < USABLE_MAX_ITEMS;
         }
     }
+    public bool Enabled
+    {
+        get
+        {
+            return _enabled;
+        }
+        set
+        {
+            _enabled = value;
+
+            ButtonEquipmentPickableToggle.gameObject.SetActive(value);
+
+            if(value)
+            {
+                if(CurrentMode == EquipmentMode.PICKABLES)
+                {
+                    PanelPickableList.gameObject.SetActive(true);
+                    PanelUsableList.gameObject.SetActive(false);
+                }
+                else
+                {
+                    PanelPickableList.gameObject.SetActive(false);
+                    PanelUsableList.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                PanelPickableList.gameObject.SetActive(false);
+                PanelUsableList.gameObject.SetActive(false);
+            }
+        }
+    }
 
     #endregion
 
     #region private
+
+    private EquipmentMode _currentMode;
+    private bool _enabled = true;
 
     private List<PickableObject> _pickableList;
     private List<PickableUsableObject> _usableList;
@@ -244,15 +293,18 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     private void SwitchPanel()
     {
-        if(CurrentMode == EquipmentMode.PICKABLES)
+        if(Enabled)
         {
-            PanelPickableList.gameObject.SetActive(true);
-            PanelUsableList.gameObject.SetActive(false);
-        }
-        else if(CurrentMode == EquipmentMode.USABLES)
-        {
-            PanelPickableList.gameObject.SetActive(false);
-            PanelUsableList.gameObject.SetActive(true);
+            if (CurrentMode == EquipmentMode.PICKABLES)
+            {
+                PanelPickableList.gameObject.SetActive(true);
+                PanelUsableList.gameObject.SetActive(false);
+            }
+            else if (CurrentMode == EquipmentMode.USABLES)
+            {
+                PanelPickableList.gameObject.SetActive(false);
+                PanelUsableList.gameObject.SetActive(true);
+            }
         }
     }
 

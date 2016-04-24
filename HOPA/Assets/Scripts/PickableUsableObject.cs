@@ -64,7 +64,7 @@ public class PickableUsableObject : PickableObject
 
     protected override void PickUp(Vector2 position, Collider2D col)
     {
-        if (col != null && col.gameObject == this.gameObject)
+        if (col != null && col.gameObject == this.gameObject && EquipmentManager.Instance.EquipmentFreeContainersAvailable)
         {
             Vector3 tgt = Vector3.zero, scl = Vector3.zero;
 

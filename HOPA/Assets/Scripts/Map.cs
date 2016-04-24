@@ -56,9 +56,9 @@ public class Map : PickableUsableObject
     // Buttons
     private Dictionary<Button, MapButton> _mapButtons;
     private CanvasGroup _mapButtonsGroup;
-    private Image _mapBackground;
+    //private Image _mapBackground;
     private List<MapDirectionButton> _directionButtons;
-    private Button _exitButton;
+    //private Button _exitButton;
     private Vector2 _movementOneClick;
     private byte[,] _positionArray;
     private Int2 _currentPositionInArray;
@@ -80,7 +80,7 @@ public class Map : PickableUsableObject
         int count = buttons.Length;
 
         _mapButtonsGroup = MapObject.gameObject.GetComponentsInChildren<CanvasGroup>()[1];
-        _mapBackground = _mapButtonsGroup.gameObject.GetComponent<Image>();
+        //_mapBackground = _mapButtonsGroup.gameObject.GetComponent<Image>();
 
         for(int i = 0; i < count; ++i)
         {
@@ -92,7 +92,7 @@ public class Map : PickableUsableObject
             }
             else if(buttons[i].name.Contains("MapButtonBack"))
             {
-                _exitButton = buttons[i];
+                //_exitButton = buttons[i];
                 buttons[i].onClick.AddListener(new UnityAction(HideMap));
             }
             else if(buttons[i].name.Contains("MapDirectionButton"))
