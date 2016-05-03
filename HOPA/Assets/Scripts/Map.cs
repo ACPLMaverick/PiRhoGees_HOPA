@@ -251,6 +251,7 @@ public class Map : PickableUsableObject
 
     public void ShowMap()
     {
+        EquipmentManager.Instance.DisplayBackButton(false);
         MapObject.gameObject.SetActive(true);
         StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
         AudioManager.Instance.PlayClip(SoundUnfold, 0.0f);
@@ -259,6 +260,7 @@ public class Map : PickableUsableObject
 
     public void HideMap()
     {
+        EquipmentManager.Instance.DisplayBackButton(true);
         StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, false));
         _isEnabled = false;
         AudioManager.Instance.PlayClip(SoundFold, 0.0f);

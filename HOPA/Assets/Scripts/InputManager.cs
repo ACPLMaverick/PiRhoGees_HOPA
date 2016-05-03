@@ -43,6 +43,7 @@ public class InputManager : Singleton<InputManager>
 
     private Vector2 _cursorPrevPosition;
     private bool _canInvokeMoveExclusive = false;
+    private bool _isMove;
     private Collider2D _invokeMoveExclusiveCollider2DHelper = null;
     private KeyValuePair<int, SortedList<int, Collider2D>>[] _sortLayerList;
     private int _sLayerCount;
@@ -81,14 +82,21 @@ public class InputManager : Singleton<InputManager>
                 CursorCurrentPosition = cTouch1.position;
 
                 // ClickUp
-                if (cTouch1.phase == TouchPhase.Ended && OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled)
+                if (cTouch1.phase == TouchPhase.Ended)
                 {
-                    OnInputClickUp(cTouch1.position, GetCollider2DUnderCursor());
-
-                    if(_canInvokeMoveExclusive)
+                    if (OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled && !_isMove)
                     {
-                        _canInvokeMoveExclusive = false;
-                        _invokeMoveExclusiveCollider2DHelper = null;
+                        OnInputClickUp(cTouch1.position, GetCollider2DUnderCursor());
+
+                        if (_canInvokeMoveExclusive)
+                        {
+                            _canInvokeMoveExclusive = false;
+                            _invokeMoveExclusiveCollider2DHelper = null;
+                        }
+                    }
+                    else if(_isMove)
+                    {
+                        _isMove = false;
                     }
                 }
 
@@ -109,6 +117,11 @@ public class InputManager : Singleton<InputManager>
                 {
                     Collider2D uc = GetCollider2DUnderCursor();
                     if(OnInputMove != null) OnInputMove(cTouch1.position, cTouch1.position - _cursorPrevPosition, uc);
+
+                    if(!_isMove)
+                    {
+                        _isMove = true;
+                    }
 
                     if(!_canInvokeMoveExclusive)
                     {

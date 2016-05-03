@@ -32,8 +32,8 @@ public class GameManager : Singleton<GameManager>
     // Use this for initialization
     void Start ()
     {
-        RoomFirst.CompletedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
-        RoomFirstPuzzle.CompletedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomAssignPuzzleFinished));
+        RoomFirst.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
+        RoomFirstPuzzle.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomAssignPuzzleFinished));
 
         ClearedText.GetComponent<CanvasGroup>().alpha = 0.0f;
         ClearedText.gameObject.SetActive(false);
@@ -43,6 +43,8 @@ public class GameManager : Singleton<GameManager>
 
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
         CurrentRoom.Initialize();
+        CurrentRoom.Enter();
+        ItemInfoManager.Instance.gameObject.SetActive(false);
 	}
 	
 	// Update is called once per frame
@@ -92,10 +94,13 @@ public class GameManager : Singleton<GameManager>
 
     private void MoveToCurrentRoom()
     {
+        CurrentRoom.Leave();
+
         CurrentRoom = _nextRoom;
         _nextRoom = CurrentRoom.NextRoom;
 
-        CurrentRoom.Initialize();
+        CurrentRoom.Initialize();   // nothing will happen if already initialized
+        CurrentRoom.Enter();
 
         CameraManager.Instance.RecalculateToCurrentRoom();
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
@@ -171,7 +176,7 @@ public class GameManager : Singleton<GameManager>
         cg.alpha = startAlpha;
         t.gameObject.SetActive(false);
 
-        r.Finish();
+        //r.Leave();
 
         if (r.NextRoom != null)
         {

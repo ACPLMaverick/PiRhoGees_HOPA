@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Events;
 using System.Collections;
+
+public class UnityEventPickedUp : UnityEvent<PickableObject> {  };
 
 public class PickableObject : MonoBehaviour
 {
     #region events
 
-    public delegate void PickedUp(PickableObject sender);
-
-    public static event PickedUp OnPickedUp;
+    public UnityEventPickedUp OnPickedUp;
 
     #endregion
 
@@ -21,10 +23,47 @@ public class PickableObject : MonoBehaviour
 
     public uint ID = 0;
     public string Name;
+    public string Description;
+
+    #endregion
+
+    #region properties
+
+    public Button AssociatedListElement
+    {
+        get
+        {
+            return _associatedListElement;
+        }
+        
+        set
+        {
+            if(_associatedListElement != null)
+            {
+                _associatedListElement.onClick.RemoveListener(_actionOnListElementClick);
+            }
+            _associatedListElement = value;
+            _associatedListElement.onClick.AddListener(_actionOnListElementClick);
+        }
+    }
+
+    #endregion
+
+    #region protected
+
+    protected Button _associatedListElement;
+    protected bool _picked = false;
+    protected UnityAction _actionOnListElementClick;
 
     #endregion
 
     #region functions 
+
+    protected virtual void Awake()
+    {
+        OnPickedUp = new UnityEventPickedUp();
+        _actionOnListElementClick = new UnityAction(OnListElementClick);
+    }
 
     // Use this for initialization
     protected virtual void Start ()
@@ -38,9 +77,14 @@ public class PickableObject : MonoBehaviour
 	
 	}
 
+    protected virtual void OnListElementClick()
+    {
+        ItemInfoManager.Instance.Show(GetComponent<SpriteRenderer>().sprite, Name, Description);
+    }
+
     protected virtual void PickUp(Vector2 position, Collider2D col)
     {
-        if (col != null && col.gameObject == this.gameObject)
+        if (col != null && col.gameObject == this.gameObject && !_picked)
         {
             col.gameObject.transform.SetParent(Camera.main.transform, true);
             Vector3 tgt = Vector3.zero, scl = Vector3.zero;
@@ -62,7 +106,8 @@ public class PickableObject : MonoBehaviour
             InputManager.OnInputClickDown -= PickUp;
             //col.gameObject.transform.SetParent(Camera.main.transform, true);
 
-            InvokeOnPickedUp(this);
+            _picked = true;
+            OnPickedUp.Invoke(this);
 
             // here will play professional animation, for now just simple coroutine
             // destruction will also be performed somewhat smarter
@@ -71,6 +116,11 @@ public class PickableObject : MonoBehaviour
 
     protected virtual void FinishedFlying()
     {
+        if(AssociatedListElement != null)
+        {
+            AssociatedListElement.GetComponent<Text>().fontStyle = FontStyle.BoldAndItalic;
+            AssociatedListElement.GetComponent<Button>().interactable = false;
+        }
         GameObject.DestroyImmediate(this.gameObject);
     }
 
@@ -90,16 +140,6 @@ public class PickableObject : MonoBehaviour
 
         FinishedFlying();
         yield return null;
-    }
-
-    #endregion
-
-    #region eventCallers
-
-    protected void InvokeOnPickedUp(PickableObject arg)
-    {
-        if (OnPickedUp != null)
-            OnPickedUp(arg);
     }
 
     #endregion

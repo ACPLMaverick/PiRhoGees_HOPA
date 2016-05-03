@@ -10,14 +10,16 @@ public class Room : MonoBehaviour
     #region events
 
     public RoomUnityEvent InitializeEvent;
-    public RoomUnityEvent CompletedEvent;
+    public RoomUnityEvent FinishedEvent;
 
     #endregion
 
     #region public
 
     public Room NextRoom = null;
+    public Room PrevRoom = null;
     // public Message NextMessage;
+    public bool PickableAllowed = true;
     public bool Locked = false;
     public bool CameraEnabled = true;
     public MapButton AssociatedMapButton;
@@ -36,6 +38,7 @@ public class Room : MonoBehaviour
 
     protected bool _initialized;
     protected bool _finished;
+    protected bool _inRoom;
 
     #endregion
 
@@ -43,7 +46,7 @@ public class Room : MonoBehaviour
     {
         // gather all pickableobjects in a room 
 
-        CompletedEvent = new RoomUnityEvent();
+        FinishedEvent = new RoomUnityEvent();
         InitializeEvent = new RoomUnityEvent();
 
         PickableObjects = new List<PickableObject>();
@@ -52,19 +55,25 @@ public class Room : MonoBehaviour
         PickableObject[] objs = this.gameObject.GetComponentsInChildren<PickableObject>();
         foreach (PickableObject obj in objs)
         {
-            if(obj.GetType() == typeof(PickableObject))
+            if (obj.GetType() == typeof(PickableObject))
             {
                 PickableObjects.Add(obj);
             }
-            else if(obj.GetType() == typeof(PickableUsableObject))
+            else if (obj.GetType() == typeof(PickableUsableObject))
             {
                 PickableUsableObjects.Add((PickableUsableObject)obj);
             }
+
+            if (PickableAllowed)
+            {
+                obj.OnPickedUp.AddListener(new UnityAction<PickableObject>(RemoveOnPickup));
+            }
         }
 
-        PickableObject.OnPickedUp += RemoveOnPickup;
-
-        AssociatedMapButton.AssociatedRoom = this;
+        if(AssociatedMapButton != null)
+        {
+            AssociatedMapButton.AssociatedRoom = this;
+        }
     }
 
     // Use this for initialization
@@ -106,6 +115,7 @@ public class Room : MonoBehaviour
         if(!_initialized)
         {
             _initialized = true;
+
             OnInitialize();
         }
     }
@@ -116,6 +126,35 @@ public class Room : MonoBehaviour
         {
             _finished = true;
             OnFinished();
+        }
+    }
+
+    public void Enter()
+    {
+        if(!_inRoom)
+        {
+            _inRoom = true;
+
+            if (PrevRoom != null)
+            {
+                EquipmentManager.Instance.DisplayBackButton(true);
+            }
+            else
+            {
+                EquipmentManager.Instance.DisplayBackButton(false);
+            }
+
+            OnEntered();
+        }
+    }
+
+    public void Leave()
+    {
+        if(_inRoom)
+        {
+            _inRoom = false;
+
+            OnLeft();
         }
     }
 
@@ -131,6 +170,16 @@ public class Room : MonoBehaviour
 
     protected virtual void OnFinished()
     {
-        CompletedEvent.Invoke(this);
+        FinishedEvent.Invoke(this);
+    }
+
+    protected virtual void OnEntered()
+    {
+
+    }
+
+    protected virtual void OnLeft()
+    {
+
     }
 }

@@ -64,7 +64,7 @@ public class PickableUsableObject : PickableObject
 
     protected override void PickUp(Vector2 position, Collider2D col)
     {
-        if (col != null && col.gameObject == this.gameObject && EquipmentManager.Instance.EquipmentFreeContainersAvailable)
+        if (col != null && col.gameObject == this.gameObject && EquipmentManager.Instance.EquipmentFreeContainersAvailable && !_picked)
         {
             Vector3 tgt = Vector3.zero, scl = Vector3.zero;
 
@@ -84,7 +84,8 @@ public class PickableUsableObject : PickableObject
             EquipmentManager.Instance.AddObjectToPool(this, FADE_OUT_TIME_SEC);
             InputManager.OnInputClickDown -= PickUp;
 
-            InvokeOnPickedUp(this);
+            _picked = true;
+            OnPickedUp.Invoke(this);
 
             // here will play professional animation, for now just simple coroutine
             // destruction will also be performed somewhat smarter

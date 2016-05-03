@@ -38,17 +38,16 @@ public class RoomPuzzleAssign : Room
         ++_assigned;
         if (_assigned == _assignableCount)
         {
-            CompletedEvent.Invoke(this);
+            FinishedEvent.Invoke(this);
         }
     }
 
-    protected override void OnInitialize()
+    protected override void OnEntered()
     {
-        InitializeEvent.Invoke(this);
         EquipmentManager.Instance.Enabled = false;
     }
 
-    protected override void OnFinished()
+    protected override void OnLeft()
     {
         EquipmentManager.Instance.Enabled = true;
         EquipmentManager.Instance.CurrentMode = EquipmentManager.EquipmentMode.USABLES;

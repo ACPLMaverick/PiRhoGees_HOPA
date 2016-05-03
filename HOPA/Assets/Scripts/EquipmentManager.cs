@@ -29,6 +29,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     public GameObject PickableListElementPrefab;
     public GameObject UsableListElementPrefab;
     public Button ButtonEquipmentPickableToggle;
+    public Button ButtonBack;
 
     #endregion
 
@@ -185,6 +186,11 @@ public class EquipmentManager : Singleton<EquipmentManager>
         }
     }
 
+    public void DisplayBackButton(bool display)
+    {
+        ButtonBack.gameObject.SetActive(display);
+    }
+
     private IEnumerator AddObjectToPoolCoroutine(PickableUsableObject obj, float lagSeconds)
     {
         yield return new WaitForSeconds(lagSeconds);
@@ -212,9 +218,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
         yield return new WaitForSeconds(lagSeconds);
 
         _pickableList.Add(obj);
-
-        Text associated = _allPickablesDict[obj];
-        ChangeTextToPicked(associated);
 
         yield return null;
     }
@@ -269,6 +272,10 @@ public class EquipmentManager : Singleton<EquipmentManager>
             newobj.transform.SetParent(PanelPickableList.transform, true);
             Text text = newobj.GetComponent<Text>();
             text.text = obj.Name;
+
+            // Assigning list element to pickable object here
+            obj.AssociatedListElement = newobj.GetComponent<Button>();
+
             RectTransform rt = newobj.GetComponent<RectTransform>();
             if (i % 4 == 0 && i != 0)
             {
