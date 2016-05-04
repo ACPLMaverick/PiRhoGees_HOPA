@@ -232,6 +232,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
         _usableContainers = new UsableContainer[USABLE_MAX_ITEMS];
 
         Vector2 firstPos = PanelUsableList.position;
+        firstPos.y = PanelUsableList.position.y + PanelUsableList.rect.height * 0.39f;
         GameObject container = (GameObject)Instantiate(UsableListElementPrefab, firstPos, Quaternion.identity);
         float xDelta = (PanelUsableList.rect.height - (container.GetComponent<Image>()).rectTransform.rect.height) * 0.5f;
         float panelWidth = container.GetComponent<RectTransform>().rect.width;
@@ -262,8 +263,8 @@ public class EquipmentManager : Singleton<EquipmentManager>
         List<PickableObject> pickablesOnLevel = GameManager.Instance.CurrentRoom.PickableObjects;
 
         Vector2 firstPos = PanelPickableList.position;
-        firstPos.x -= PanelPickableList.rect.width * 0.5f;
-        firstPos.y += PanelPickableList.rect.height * 0.5f - 10.0f;
+        firstPos.x -= PanelPickableList.rect.width * 0.35f;
+        firstPos.y += PanelPickableList.rect.height * 0.65f;
         int i = 0;
         Vector2 nextPos = firstPos;
         foreach(PickableObject obj in pickablesOnLevel)
@@ -312,6 +313,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 PanelPickableList.gameObject.SetActive(false);
                 PanelUsableList.gameObject.SetActive(true);
             }
+            ButtonEquipmentPickableToggle.GetComponent<ButtonEquipmentPanelToggle>().SwitchMode(CurrentMode);
         }
     }
 

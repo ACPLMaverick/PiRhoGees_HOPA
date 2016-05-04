@@ -4,6 +4,7 @@ using System.Collections;
 public class Singleton<T> : MonoBehaviour where T : Singleton<T>
 {
     private static T _instance;
+    protected bool _destroyOnLoad = true;
     
     /// <summary>
     /// Get instance of class T
@@ -37,7 +38,11 @@ public class Singleton<T> : MonoBehaviour where T : Singleton<T>
         if(_instance == null)
         {
             _instance = (T)this;
-            DontDestroyOnLoad(transform.root.gameObject);
+
+            if(!_destroyOnLoad)
+            {
+                DontDestroyOnLoad(transform.root.gameObject);
+            }
         }
     }
 

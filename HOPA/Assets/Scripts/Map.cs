@@ -5,16 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-
 public class Map : PickableUsableObject
 {
     #region enum
 
     public enum MapMovementDirection
     {
-        UP,
         RIGHT,
-        DOWN,
         LEFT
     };
 
@@ -25,44 +22,24 @@ public class Map : PickableUsableObject
     public CanvasGroup MapObject;
     public AudioClip SoundUnfold;
     public AudioClip SoundFold;
-    public int MapDivision = 2;
+    public List<Room> RoomsOnMap;
+    public GameObject MapElementPrefab;
 
     #endregion
 
     #region private
 
-    protected struct Int2
-    {
-        public int x;
-        public int y;
-
-        public Int2(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
-        public static Int2 operator +(Int2 first, Int2 second)
-        {
-            return new Int2(first.x + second.x, first.y + second.y);
-        }
-
-        public static Int2 operator -(Int2 first, Int2 second)
-        {
-            return new Int2(first.x - second.x, first.y - second.y);
-        }
-    };
-
     // Buttons
-    private Dictionary<Button, MapButton> _mapButtons;
+    private List<MapPart> _mapParts;
     private CanvasGroup _mapButtonsGroup;
-    //private Image _mapBackground;
-    private List<MapDirectionButton> _directionButtons;
+    private Image _mapTitle;
+    private MapDirectionButton _directionButtonLeft;
+    private MapDirectionButton _directionButtonRight;
     //private Button _exitButton;
     private Vector2 _movementOneClick;
-    private byte[,] _positionArray;
-    private Int2 _currentPositionInArray;
     private bool _isEnabled = false;
+    private int _currentMapPosition = 0;
+    private int _totalMapLength;
 
     #endregion
 
@@ -73,64 +50,69 @@ public class Map : PickableUsableObject
     {
         base.Start();
 
-        _mapButtons = new Dictionary<Button, MapButton>();
-        _directionButtons = new List<MapDirectionButton>();
+        _totalMapLength = RoomsOnMap.Count + 1;
+
+        _mapParts = new List<MapPart>();
 
         Button[] buttons = MapObject.gameObject.GetComponentsInChildren<Button>();
         int count = buttons.Length;
 
         _mapButtonsGroup = MapObject.gameObject.GetComponentsInChildren<CanvasGroup>()[1];
-        //_mapBackground = _mapButtonsGroup.gameObject.GetComponent<Image>();
+        _mapTitle = _mapButtonsGroup.gameObject.GetComponentsInChildren<Image>()[1];
 
         for(int i = 0; i < count; ++i)
         {
-            if(buttons[i].name.Contains("MapButtonLoc"))
-            {
-                MapButton mp = buttons[i].gameObject.GetComponent<MapButton>();
-                _mapButtons.Add(buttons[i], mp);
-                mp.ClickedEvent.AddListener(new UnityAction<MapButton>(OnMapButtonClick));
-            }
-            else if(buttons[i].name.Contains("MapButtonBack"))
+            if(buttons[i].name.Contains("MapButtonBack"))
             {
                 //_exitButton = buttons[i];
                 buttons[i].onClick.AddListener(new UnityAction(HideMap));
             }
-            else if(buttons[i].name.Contains("MapDirectionButton"))
+            else if(buttons[i].name.Contains("MapDirectionButtonLeft"))
             {
-                _directionButtons.Add(buttons[i].GetComponent<MapDirectionButton>());
-                buttons[i].GetComponent<MapDirectionButton>().ClickedEvent.AddListener(new UnityAction<MapDirectionButton>(OnDirectionButtonClick));
+                _directionButtonLeft = buttons[i].GetComponent<MapDirectionButton>();
+                _directionButtonLeft.ClickedEvent.AddListener(new UnityAction<MapDirectionButton>(OnDirectionButtonClick));
+            }
+            else if (buttons[i].name.Contains("MapDirectionButtonRight"))
+            {
+                _directionButtonRight = buttons[i].GetComponent<MapDirectionButton>();
+                _directionButtonRight.ClickedEvent.AddListener(new UnityAction<MapDirectionButton>(OnDirectionButtonClick));
             }
         }
-
-        // create position array
-        _positionArray = new byte[MapDivision + 2, MapDivision + 2];
-        for(int i = 0; i < MapDivision + 2; ++i)
-        {
-            for(int j = 0; j < MapDivision + 2; ++j)
-            {
-                if(i == 0 || j == 0 || i == MapDivision + 1 || j == MapDivision + 1)
-                {
-                    _positionArray[i, j] = 0;
-                }
-                else
-                {
-                    _positionArray[i, j] = 1;
-                }
-            }
-        }
-
-        // assign start position, i.e. top left corner of the array
-        ValidateMapPosition(new Int2(1, 1));
-        UpdateMapPositionOnDirectionButtons();
 
         // calculate movementOneClick and scale factor
-        float scaleFactor = (float)MapDivision;
-        RectTransform r = _mapButtonsGroup.GetComponent<RectTransform>();
-        _movementOneClick = - new Vector2(r.rect.width * 0.5f, r.rect.height * 0.5f);
+        RectTransform r = _mapTitle.GetComponent<RectTransform>();
+        _movementOneClick = new Vector2(r.rect.width, 0.0f);
 
-        // scale and move buttonsgroup to the proper left top corner
-        r.localScale *= scaleFactor;
-        r.position = new Vector2(r.position.x - _movementOneClick.x, r.position.y + _movementOneClick.y);
+        // instantiate map parts according to part list
+        Vector2 d = _movementOneClick;
+
+        foreach(Room room in RoomsOnMap)
+        {
+            GameObject container = (GameObject)Instantiate(MapElementPrefab, r.position, Quaternion.identity);
+            container.transform.SetParent(_mapButtonsGroup.transform, true);
+
+            RectTransform tr = container.GetComponent<RectTransform>();
+            tr.sizeDelta = r.sizeDelta;
+            tr.localPosition += new Vector3(d.x, d.y, 0.0f);
+
+            MapPart mp = container.GetComponent<MapPart>();
+            mp.AssociatedRoom = room;
+            mp.ClickedEvent.AddListener(new UnityAction<MapPart>(OnMapButtonClick));
+            if(room.Locked)
+            {
+                mp.Lock();
+            }
+            else
+            {
+                mp.Unlock();
+            }
+
+            _mapParts.Add(mp);
+            d.x += _movementOneClick.x;
+        }
+
+        _directionButtonLeft.GetComponent<Button>().interactable = false;
+        _directionButtonRight.GetComponent<Button>().interactable = true;
 
         MapObject.gameObject.SetActive(false);
         MapObject.alpha = 0.0f;
@@ -144,38 +126,49 @@ public class Map : PickableUsableObject
 
     public void OnDirectionButtonClick(MapDirectionButton directionEnum)
     {
+        if(!_isEnabled)
+        {
+            return;
+        }
+
         Vector2 direction = Vector2.zero;
-        Int2 delta = new Int2(0, 0);
+        int nextPosition = _currentMapPosition;
 
         switch (directionEnum.AssociatedDirection)
         {
-            case MapMovementDirection.DOWN:
-                direction = Vector2.down;
-                delta = new Int2(0, 1);
-                break;
             case MapMovementDirection.LEFT:
+                --nextPosition;
                 direction = Vector2.left;
-                delta = new Int2(-1, 0);
                 break;
             case MapMovementDirection.RIGHT:
+                ++nextPosition;
                 direction = Vector2.right;
-                delta = new Int2(1, 0);
-                break;
-            case MapMovementDirection.UP:
-                direction = Vector2.up;
-                delta = new Int2(0, -1);
                 break;
         }
 
-        Int2 newPositionInArray = _currentPositionInArray + delta;
-
-        if(ValidateMapPosition(newPositionInArray))
+        if (nextPosition >= 0 && nextPosition < _totalMapLength)
         {
-            UpdateMapPositionOnDirectionButtons();
+            if(nextPosition == 0)
+            {
+                _directionButtonLeft.GetComponent<Button>().interactable = false;
+                _directionButtonRight.GetComponent<Button>().interactable = true;
+            }
+            else if(nextPosition == _totalMapLength - 1)
+            {
+                _directionButtonLeft.GetComponent<Button>().interactable = true;
+                _directionButtonRight.GetComponent<Button>().interactable = false;
+            }
+            else
+            {
+                _directionButtonLeft.GetComponent<Button>().interactable = true;
+                _directionButtonRight.GetComponent<Button>().interactable = true;
+            }
+
+            _currentMapPosition = nextPosition;
 
             Vector2 finalMovement;
-            finalMovement.x = direction.x * _movementOneClick.x * 2.0f;
-            finalMovement.y = direction.y * _movementOneClick.y * 2.0f;
+            finalMovement.x = direction.x * -_movementOneClick.x;
+            finalMovement.y = direction.y * -_movementOneClick.y;
 
             RectTransform r = _mapButtonsGroup.GetComponent<RectTransform>();
             finalMovement = new Vector2(r.position.x, r.position.y) + finalMovement;
@@ -183,7 +176,7 @@ public class Map : PickableUsableObject
         }
     }
 
-    protected void OnMapButtonClick(MapButton mp)
+    protected void OnMapButtonClick(MapPart mp)
     {
         //Debug.Log("Invoked for button " + mp.gameObject.name + " on room " + mp.AssociatedRoom.name);
 
@@ -194,64 +187,45 @@ public class Map : PickableUsableObject
         }
     }
 
-    /// <summary>
-    /// 
-    /// <returns>
-    /// If true returned, current map position has ben changed to a new one.
-    /// If false, no changes have been made.
-    /// </returns>
-    /// </summary>
-    protected bool ValidateMapPosition(Int2 newPosition)
-    {
-        if(_positionArray[newPosition.x, newPosition.y] == 0)
-        {
-            return false;
-        }
-        else
-        {
-            _positionArray[_currentPositionInArray.x, _currentPositionInArray.y] = 1;
-            _positionArray[newPosition.x, newPosition.y] = 2;
-            _currentPositionInArray = newPosition;
-            return true;
-        }
-    }
+    //protected void UpdateMapPositionOnDirectionButtons()
+    //{
+    //    Int2 delta = new Int2(0, 0);
+    //    foreach(MapDirectionButton b in _directionButtons)
+    //    {
+    //        switch (b.AssociatedDirection)
+    //        {
+    //            case MapMovementDirection.DOWN:
+    //                delta = new Int2(0, 1);
+    //                break;
+    //            case MapMovementDirection.LEFT:
+    //                delta = new Int2(-1, 0);
+    //                break;
+    //            case MapMovementDirection.RIGHT:
+    //                delta = new Int2(1, 0);
+    //                break;
+    //            case MapMovementDirection.UP:
+    //                delta = new Int2(0, -1);
+    //                break;
+    //        }
 
-    protected void UpdateMapPositionOnDirectionButtons()
-    {
-        Int2 delta = new Int2(0, 0);
-        foreach(MapDirectionButton b in _directionButtons)
-        {
-            switch (b.AssociatedDirection)
-            {
-                case MapMovementDirection.DOWN:
-                    delta = new Int2(0, 1);
-                    break;
-                case MapMovementDirection.LEFT:
-                    delta = new Int2(-1, 0);
-                    break;
-                case MapMovementDirection.RIGHT:
-                    delta = new Int2(1, 0);
-                    break;
-                case MapMovementDirection.UP:
-                    delta = new Int2(0, -1);
-                    break;
-            }
-
-            delta += _currentPositionInArray;
-            if(_positionArray[delta.x, delta.y] != 2)
-            {
-                b.GetComponent<Button>().interactable = true;
-            }
-            else
-            {
-                b.GetComponent<Button>().interactable = false;
-            }
-        }
-    }
+    //        delta += _currentPositionInArray;
+    //        if(_positionArray[delta.x, delta.y] != 2)
+    //        {
+    //            b.GetComponent<Button>().interactable = true;
+    //        }
+    //        else
+    //        {
+    //            b.GetComponent<Button>().interactable = false;
+    //        }
+    //    }
+    //}
 
     public void ShowMap()
     {
-        EquipmentManager.Instance.DisplayBackButton(false);
+        if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+        {
+            EquipmentManager.Instance.DisplayBackButton(false);
+        }
         MapObject.gameObject.SetActive(true);
         StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
         AudioManager.Instance.PlayClip(SoundUnfold, 0.0f);
@@ -260,7 +234,10 @@ public class Map : PickableUsableObject
 
     public void HideMap()
     {
-        EquipmentManager.Instance.DisplayBackButton(true);
+        if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+        {
+            EquipmentManager.Instance.DisplayBackButton(true);
+        }
         StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, false));
         _isEnabled = false;
         AudioManager.Instance.PlayClip(SoundFold, 0.0f);

@@ -79,7 +79,7 @@ public class PickableObject : MonoBehaviour
 
     protected virtual void OnListElementClick()
     {
-        ItemInfoManager.Instance.Show(GetComponent<SpriteRenderer>().sprite, Name, Description);
+        GameManager.Instance.ItemInfoGroup.Show(GetComponent<SpriteRenderer>().sprite, Name, Description);
     }
 
     protected virtual void PickUp(Vector2 position, Collider2D col)
@@ -119,6 +119,7 @@ public class PickableObject : MonoBehaviour
         if(AssociatedListElement != null)
         {
             AssociatedListElement.GetComponent<Text>().fontStyle = FontStyle.BoldAndItalic;
+            AssociatedListElement.GetComponent<Button>().onClick.RemoveListener(_actionOnListElementClick);
             AssociatedListElement.GetComponent<Button>().interactable = false;
         }
         GameObject.DestroyImmediate(this.gameObject);

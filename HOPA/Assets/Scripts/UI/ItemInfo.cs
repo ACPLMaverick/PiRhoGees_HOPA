@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class ItemInfoManager : Singleton<ItemInfoManager>
+public class ItemInfo : MonoBehaviour
 {
     #region private
 
@@ -16,8 +16,7 @@ public class ItemInfoManager : Singleton<ItemInfoManager>
 
     #region functions
 
-    // Use this for initialization
-    void Start ()
+    protected virtual void Awake()
     {
         _grp = GetComponent<CanvasGroup>();
         Image[] imgs = GetComponentsInChildren<Image>();
@@ -27,6 +26,12 @@ public class ItemInfoManager : Singleton<ItemInfoManager>
         _txt = texts[1];
         _backButton = GetComponentInChildren<Button>();
         _backButton.onClick.AddListener(new UnityEngine.Events.UnityAction(OnBackButtonClick));
+    }
+
+    // Use this for initialization
+    void Start ()
+    {
+
 	}
 
     // Update is called once per frame

@@ -4,9 +4,29 @@ using System.Collections;
 
 public class BackButton : MonoBehaviour
 {
+    #region public
 
-	// Use this for initialization
-	void Start ()
+    public Sprite SpritePuzzle;
+    public Sprite SpriteBack;
+
+    #endregion
+
+    #region private
+
+    private Image _img;
+    private bool _isPuzzle;
+
+    #endregion
+
+    #region functions
+
+    protected virtual void Awake()
+    {
+        _img = GetComponent<Image>();
+    }
+
+    // Use this for initialization
+    void Start ()
     {
         GetComponent<Button>().onClick.AddListener(new UnityEngine.Events.UnityAction(OnClick));
 	}
@@ -19,9 +39,34 @@ public class BackButton : MonoBehaviour
 
     protected void OnClick()
     {
-        if(GameManager.Instance.CurrentRoom.PrevRoom != null)
+        if(_isPuzzle)
         {
-            GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.PrevRoom);
+            if (GameManager.Instance.CurrentRoom.NextRoom != null)
+            {
+                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.NextRoom);
+            }
+        }
+        else
+        {
+            if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+            {
+                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.PrevRoom);
+            }
         }
     }
+
+    public void ShowAsPuzzle(bool flag)
+    {
+        _isPuzzle = flag;
+        if(flag)
+        {
+            _img.sprite = SpritePuzzle;
+        }
+        else
+        {
+            _img.sprite = SpriteBack;
+        }
+    }
+
+    #endregion
 }
