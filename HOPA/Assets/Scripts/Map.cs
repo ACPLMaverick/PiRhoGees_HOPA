@@ -88,10 +88,11 @@ public class Map : PickableUsableObject
 
         foreach(Room room in RoomsOnMap)
         {
-            GameObject container = (GameObject)Instantiate(MapElementPrefab, r.position, Quaternion.identity);
-            container.transform.SetParent(_mapButtonsGroup.transform, true);
+            GameObject container = (GameObject)Instantiate(MapElementPrefab, Vector3.zero, Quaternion.identity);
+            container.transform.SetParent(_mapButtonsGroup.transform, false);
 
             RectTransform tr = container.GetComponent<RectTransform>();
+            tr.localScale = Vector3.one;
             tr.sizeDelta = r.sizeDelta;
             tr.localPosition += new Vector3(d.x, d.y, 0.0f);
 
@@ -167,7 +168,7 @@ public class Map : PickableUsableObject
             _currentMapPosition = nextPosition;
 
             Vector2 finalMovement;
-            finalMovement.x = direction.x * -_movementOneClick.x;
+            finalMovement.x = direction.x * -_movementOneClick.x * _mapTitle.canvas.scaleFactor;
             finalMovement.y = direction.y * -_movementOneClick.y;
 
             RectTransform r = _mapButtonsGroup.GetComponent<RectTransform>();
