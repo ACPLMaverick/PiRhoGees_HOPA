@@ -1,9 +1,10 @@
 fileFormatVersion: 2
 guid: 6ecde745ec981de4e8f096d2ca6b5509
-timeCreated: 1462293972
-licenseType: Free
+timeCreated: 1462388839
+licenseType: Pro
 TextureImporter:
-  fileIDToRecycleName: {}
+  fileIDToRecycleName:
+    21300000: podpowiedzi_0
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -30,7 +31,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     filterMode: -1
-    aniso: -1
+    aniso: 16
     mipBias: -1
     wrapMode: 1
   nPOTScale: 0
@@ -38,7 +39,7 @@ TextureImporter:
   rGBM: 0
   compressionQuality: 50
   allowsAlphaSplitting: 0
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -49,7 +50,46 @@ TextureImporter:
   textureType: 8
   buildTargetSettings: []
   spriteSheet:
-    sprites: []
+    sprites:
+    - name: podpowiedzi_0
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 497
+        width: 729
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -312.5, y: -36.5}
+        - {x: -310.5, y: -36.5}
+        - {x: -306.5, y: -32.5}
+        - {x: -298.5, y: -23.5}
+        - {x: 364.5, y: -23.5}
+        - {x: 364.5, y: 79.5}
+        - {x: -338.5, y: 79.5}
+        - {x: -338.5, y: 16.5}
+        - {x: -339.5, y: 15.5}
+        - {x: -342.5, y: 7.5}
+        - {x: -343.5, y: 2.5}
+        - {x: -345.5, y: -2.5}
+        - {x: -347.5, y: -12.5}
+        - {x: -349.5, y: -15.5}
+        - {x: -350.5, y: -20.5}
+        - {x: -352.5, y: -25.5}
+        - {x: -354.5, y: -35.5}
+        - {x: -356.5, y: -38.5}
+        - {x: -357.5, y: -45.5}
+        - {x: -360.5, y: -51.5}
+        - {x: -361.5, y: -59.5}
+        - {x: -363.5, y: -61.5}
+        - {x: -364.5, y: -65.5}
+        - {x: -364.5, y: -79.5}
+        - {x: -358.5, y: -79.5}
+        - {x: -343.5, y: -64.5}
+        - {x: -342.5, y: -64.5}
+        - {x: -332.5, y: -56.5}
     outline: []
   spritePackingTag: 
   userData: 
