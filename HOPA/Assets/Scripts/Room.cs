@@ -21,7 +21,8 @@ public class Room : MonoBehaviour
     public Sprite MapSprite;
     public Room NextRoom = null;
     public Room PrevRoom = null;
-    // public Message NextMessage;
+    public float CameraZoomMin = 0.1f;
+    public float CameraZoomMax = 3.0f;
     public bool PickableAllowed = true;
     public bool Locked = false;
     public bool CameraEnabled = true;
