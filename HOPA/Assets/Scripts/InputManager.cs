@@ -85,8 +85,10 @@ public class InputManager : Singleton<InputManager>
                 // ClickUp
                 if (cTouch1.phase == TouchPhase.Ended)
                 {
-                    if (OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled && !_isMove)
+                    if (OnInputClickUp != null && InputClickUpEventsEnabled && InputAllEventsEnabled /*&& !_isMove*/)
                     {
+                        Collider2D col = GetCollider2DUnderCursor();
+                        Debug.Log("UP " + col.name);
                         OnInputClickUp(cTouch1.position, GetCollider2DUnderCursor());
 
                         if (_canInvokeMoveExclusive)
@@ -95,15 +97,17 @@ public class InputManager : Singleton<InputManager>
                             _invokeMoveExclusiveCollider2DHelper = null;
                         }
                     }
-                    else if(_isMove)
-                    {
-                        _isMove = false;
-                    }
+                    //else if(_isMove)
+                    //{
+                    //    _isMove = false;
+                    //}
                 }
 
                 // ClickDown
                 if (cTouch1.phase == TouchPhase.Began && OnInputClickDown != null && InputClickDownEventsEnabled && InputAllEventsEnabled)
                 {
+                    Collider2D col = GetCollider2DUnderCursor();
+                    Debug.Log("DOWN " + col.name);
                     OnInputClickDown(cTouch1.position, GetCollider2DUnderCursor());
                 }
 
@@ -119,10 +123,10 @@ public class InputManager : Singleton<InputManager>
                     Collider2D uc = GetCollider2DUnderCursor();
                     if (OnInputMove != null) OnInputMove(cTouch1.position, cTouch1.position - _cursorPrevPosition, uc);
 
-                    if(!_isMove)
-                    {
-                        _isMove = true;
-                    }
+                    //if(!_isMove)
+                    //{
+                    //    _isMove = true;
+                    //}
 
                     if(!_canInvokeMoveExclusive)
                     {
@@ -286,7 +290,7 @@ public class InputManager : Singleton<InputManager>
             clickPos = Input.mousePosition;
         }
         clickPos = Camera.main.ScreenToWorldPoint(clickPos);
-        return Physics2D.RaycastAll(clickPos, clickPos, 0.01f);
+        return Physics2D.RaycastAll(clickPos, clickPos, 0.01f, Physics2D.DefaultRaycastLayers, -10.0f, 10.0f);
     }
 
     public Collider2D GetCollider2DUnderCursor()

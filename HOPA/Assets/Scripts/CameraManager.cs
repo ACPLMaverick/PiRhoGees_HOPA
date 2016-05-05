@@ -81,7 +81,7 @@ public class CameraManager : Singleton<CameraManager>
 
         // check if we point the background or other object
         // we hit other object or nothing - return
-        if (hitCollider.gameObject != GameManager.Instance.CurrentRoom.gameObject || !Enabled)
+        if (hitCollider == null || hitCollider.gameObject != GameManager.Instance.CurrentRoom.gameObject || !Enabled)
         {
             return;
         }

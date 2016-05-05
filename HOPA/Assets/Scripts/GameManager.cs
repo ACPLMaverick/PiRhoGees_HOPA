@@ -15,7 +15,8 @@ public class GameManager : Singleton<GameManager>
     public Room RoomFirstPuzzle;
     public Room RoomSecond;
     public Room RoomSecondPuzzle;
-    public Room RoomThirdPuzzle;
+    public Room RoomThird;
+    public Room RoomFourth;
 
     public Image FadeImage;
     public ItemInfo ItemInfoGroup;

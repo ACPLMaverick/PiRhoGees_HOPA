@@ -172,7 +172,10 @@ public class Room : MonoBehaviour
 
     public void UnlockMapPart()
     {
-        AssociatedMapPart.Unlock();
+        if(AssociatedMapPart != null)
+        {
+            AssociatedMapPart.Unlock();
+        }
     }
 
     protected virtual void OnInitialize()
