@@ -57,6 +57,11 @@ public class Room : MonoBehaviour
         PickableObjects = new List<PickableObject>();
         PickablePickedObjects = new List<PickableObject>();
         PickableUsableObjects = new List<PickableUsableObject>();
+    }
+
+    // Use this for initialization
+    protected virtual void Start ()
+    {
         PickableObject[] objs = this.gameObject.GetComponentsInChildren<PickableObject>();
         foreach (PickableObject obj in objs)
         {
@@ -74,12 +79,6 @@ public class Room : MonoBehaviour
                 obj.OnPickedUp.AddListener(new UnityAction<PickableObject>(RemoveOnPickup));
             }
         }
-    }
-
-    // Use this for initialization
-    protected virtual void Start ()
-    {
-
     }
 
     // Update is called once per frame

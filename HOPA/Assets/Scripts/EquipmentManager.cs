@@ -168,7 +168,10 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
         for(int i = 0; i < count; ++i)
         {
-            GameObject.Destroy(itemtexts[i].gameObject);
+            if(itemtexts[i].name != "Text")
+            {
+                GameObject.Destroy(itemtexts[i].gameObject);
+            }
         }
 
         StartGUIPickables();
