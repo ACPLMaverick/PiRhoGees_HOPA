@@ -84,18 +84,25 @@ public class AssignableObject : MonoBehaviour
 
     protected void OnPickUp(Vector2 screenPos, Collider2D hitCollider2D)
     {
-        if(CurrentAssignee != null)
-        {
-            CurrentAssignee.CurrentAssignable = null;
-            CurrentAssignee = null;
-        }
         if(_isDrag)
         {
             GetComponent<Transform>().localScale /= PickedUpScaleMultiplier;
         }
         if (hitCollider2D != null && hitCollider2D.gameObject == gameObject && !IsAssigned)
         {
-            GetComponent<Transform>().localScale *= PickedUpScaleMultiplier;
+            if (CurrentAssignee != null)
+            {
+                CurrentAssignee.CurrentAssignable = null;
+                CurrentAssignee = null;
+            }
+
+            Transform trans = GetComponent<Transform>();
+            trans.localScale *= PickedUpScaleMultiplier;
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z - 1.0f);
+            trans = _textMesh.GetComponent<Transform>();
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z - 1.0f);
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            sr.sortingOrder = 99;
             _isDrag = true;
         }
     }
@@ -104,7 +111,19 @@ public class AssignableObject : MonoBehaviour
     {
         if ((hitCollider2D != null && hitCollider2D.gameObject == gameObject && !IsAssigned) || _isDrag)
         {
-            GetComponent<Transform>().localScale /= PickedUpScaleMultiplier;
+            Transform trans = GetComponent<Transform>();
+            trans.localScale /= PickedUpScaleMultiplier;
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z + 1.0f);
+            trans = _textMesh.GetComponent<Transform>();
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z + 1.0f);
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            sr.sortingOrder = 0;
+
+            if (CurrentAssignee != null)
+            {
+                CurrentAssignee.CurrentAssignable = null;
+                CurrentAssignee = null;
+            }
 
             RaycastHit2D[] hits = InputManager.Instance.GetRaycastHitsUnderCursor();
             int l = hits.Length;
@@ -112,6 +131,7 @@ public class AssignableObject : MonoBehaviour
             Vector3 lerpTargetPosition = _beginPosition;
             Vector3 lerpTargetScale = _beginScale;
             AssigneeObject assignee = null;
+
 
             for (int i = 0; i < l; ++i)
             {
@@ -146,6 +166,7 @@ public class AssignableObject : MonoBehaviour
             Vector3 wp1 = Camera.main.ScreenToWorldPoint(currentScreenPos);
             Vector3 wp2 = Camera.main.ScreenToWorldPoint(currentScreenPos + direction);
             Vector3 deltaP = wp2 - wp1;
+            deltaP.z = 0.0f;
 
             GetComponent<Transform>().position += deltaP;
         }

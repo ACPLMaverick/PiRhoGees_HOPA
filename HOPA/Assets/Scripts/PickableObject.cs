@@ -135,9 +135,8 @@ public class PickableObject : MonoBehaviour
     {
         if(AssociatedListElement != null)
         {
-            AssociatedListElement.GetComponent<Text>().fontStyle = FontStyle.BoldAndItalic;
+            EquipmentManager.Instance.ChangeTextToPicked(AssociatedListElement.GetComponent<Text>());
             AssociatedListElement.GetComponent<Button>().onClick.RemoveListener(_actionOnListElementClick);
-            AssociatedListElement.GetComponent<Button>().interactable = false;
         }
         GameObject.DestroyImmediate(this.gameObject);
     }

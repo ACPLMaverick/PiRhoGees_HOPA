@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class DisappearableObject : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class DisappearableObject : MonoBehaviour
 
     #region public
 
+    public List<RoomTransition> AssociatedTransitions;
     public GameObject ObjectToDisappear;
     public float TimeFadeOutSeconds = 1.0f;
     public DisappearableMode Mode = DisappearableMode.DISAPPEAR;
@@ -99,6 +101,11 @@ public class DisappearableObject : MonoBehaviour
             {
                 gameObject.SetActive(true);
                 StartCoroutine(FadeCoroutine(0.0f, 1.0f, TimeFadeOutSeconds, true, DestroyOnClicked));
+            }
+
+            foreach (RoomTransition rt in AssociatedTransitions)
+            {
+                rt.Locked = !rt.Locked;
             }
 
             _disappearInProgress = true;

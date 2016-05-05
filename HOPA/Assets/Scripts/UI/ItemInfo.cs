@@ -11,6 +11,7 @@ public class ItemInfo : MonoBehaviour
     private Text _tit;
     private Text _txt;
     private Button _backButton;
+    private Vector2 _defSizeDelta;
 
     #endregion
 
@@ -26,6 +27,7 @@ public class ItemInfo : MonoBehaviour
         _txt = texts[1];
         _backButton = GetComponentInChildren<Button>();
         _backButton.onClick.AddListener(new UnityEngine.Events.UnityAction(OnBackButtonClick));
+        _defSizeDelta = _img.rectTransform.sizeDelta;
     }
 
     // Use this for initialization
@@ -45,6 +47,12 @@ public class ItemInfo : MonoBehaviour
         gameObject.SetActive(true);
         StartCoroutine(FadeCoroutine(0.0f, 1.0f, 0.65f, true));
         _img.sprite = sprite;
+        Vector2 nSizeDelta = _defSizeDelta;
+        Vector2 nBounds = sprite.bounds.extents;
+        nBounds.Normalize();
+        nSizeDelta.x *= nBounds.x;
+        nSizeDelta.y *= nBounds.y;
+        _img.rectTransform.sizeDelta = nSizeDelta;
         _tit.text = title;
         _txt.text = text;
     }
