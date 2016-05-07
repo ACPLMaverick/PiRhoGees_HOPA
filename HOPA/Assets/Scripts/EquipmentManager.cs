@@ -43,11 +43,12 @@ public class EquipmentManager : Singleton<EquipmentManager>
         }
         set
         {
-            if(_currentMode != value)
+            EquipmentMode temp = _currentMode;
+            _currentMode = value;
+            if (temp != value)
             {
                 SwitchPanel();
             }
-            _currentMode = value;
         }
     }
     public bool EquipmentFreeContainersAvailable
@@ -117,7 +118,10 @@ public class EquipmentManager : Singleton<EquipmentManager>
         _allPickablesDict = new Dictionary<PickableObject, Text>();
         _pickableList = new List<PickableObject>();
         _usableList = new List<PickableUsableObject>();
-        CurrentMode = EquipmentMode.PICKABLES;
+        _currentMode = EquipmentMode.PICKABLES;
+        PanelPickableList.gameObject.SetActive(true);
+        PanelUsableList.gameObject.SetActive(false);
+        ButtonEquipmentPickableToggle.GetComponent<ButtonEquipmentPanelToggle>().SwitchMode(CurrentMode);
 
         StartGUIPickables();
         StartGUIUsables();
@@ -156,7 +160,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
     public void OnButtonEquipmentPanelToggle()
     {
         CurrentMode = (EquipmentMode)(((int)CurrentMode + 1) % 2);
-        SwitchPanel();
     }
 
     public void FlushOnNextRoom()
@@ -168,13 +171,20 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
         for(int i = 0; i < count; ++i)
         {
-            if(itemtexts[i].name != "Text")
+            if(!itemtexts[i].name.Contains("Text"))
             {
-                GameObject.Destroy(itemtexts[i].gameObject);
+                Destroy(itemtexts[i].gameObject);
             }
         }
 
         StartGUIPickables();
+
+        if((GameManager.Instance.CurrentRoom.PickableAllowed && CurrentMode == EquipmentMode.USABLES) ||
+            (!GameManager.Instance.CurrentRoom.PickableAllowed && CurrentMode == EquipmentMode.PICKABLES)
+            )
+        {
+            CurrentMode = (EquipmentMode)(((int)CurrentMode + 1) % 2);
+        }
     }
 
     public void OpenMapArbitrarily()
@@ -189,9 +199,16 @@ public class EquipmentManager : Singleton<EquipmentManager>
         }
     }
 
-    public void DisplayBackButton(bool display)
+    public void DisplayBackButton(bool display, bool interactable)
     {
         ButtonBack.gameObject.SetActive(display);
+        ButtonBack.interactable = interactable;
+    }
+
+    public void ChangeTextToPicked(Text text)
+    {
+        text.fontStyle = FontStyle.BoldAndItalic;
+        text.GetComponent<Button>().interactable = false;
     }
 
     private IEnumerator AddObjectToPoolCoroutine(PickableUsableObject obj, float lagSeconds)
@@ -223,11 +240,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
         _pickableList.Add(obj);
 
         yield return null;
-    }
-
-    private void ChangeTextToPicked(Text text)
-    {
-        text.fontStyle = FontStyle.Bold;
     }
 
     private void StartGUIUsables()
@@ -292,7 +304,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
             }
             newobj.transform.position = nextPos;
 
-            if(GameManager.Instance.CurrentRoom.PickablePickedObjects.Contains(obj))
+            if(GameManager.Instance.CurrentRoom.PickablePickedObjectIDs.Contains(obj.ID))
             {
                 ChangeTextToPicked(text);
             }

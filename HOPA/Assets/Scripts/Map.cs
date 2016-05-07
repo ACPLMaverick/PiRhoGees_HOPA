@@ -223,9 +223,9 @@ public class Map : PickableUsableObject
 
     public void ShowMap()
     {
-        if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+        if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            EquipmentManager.Instance.DisplayBackButton(false);
+            EquipmentManager.Instance.DisplayBackButton(false, EquipmentManager.Instance.ButtonBack.interactable);
         }
         MapObject.gameObject.SetActive(true);
         StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
@@ -235,9 +235,9 @@ public class Map : PickableUsableObject
 
     public void HideMap()
     {
-        if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+        if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            EquipmentManager.Instance.DisplayBackButton(true);
+            EquipmentManager.Instance.DisplayBackButton(true, EquipmentManager.Instance.ButtonBack.interactable);
         }
         StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, false));
         _isEnabled = false;
