@@ -16,13 +16,16 @@ public class Room : MonoBehaviour
 
     #region public
 
+    public string Name;
+    public string Description;
+    public Sprite MapSprite;
     public Room NextRoom = null;
     public Room PrevRoom = null;
-    // public Message NextMessage;
+    public float CameraZoomMin = 0.1f;
+    public float CameraZoomMax = 3.0f;
     public bool PickableAllowed = true;
     public bool Locked = false;
     public bool CameraEnabled = true;
-    public MapButton AssociatedMapButton;
 
     #endregion
 
@@ -31,6 +34,8 @@ public class Room : MonoBehaviour
     public List<PickableObject> PickablePickedObjects { get; private set; }
     public List<PickableObject> PickableObjects { get; private set; }
     public List<PickableUsableObject> PickableUsableObjects { get; private set; }
+
+    public MapPart AssociatedMapPart { get; set; }
 
     #endregion
 
@@ -52,6 +57,11 @@ public class Room : MonoBehaviour
         PickableObjects = new List<PickableObject>();
         PickablePickedObjects = new List<PickableObject>();
         PickableUsableObjects = new List<PickableUsableObject>();
+    }
+
+    // Use this for initialization
+    protected virtual void Start ()
+    {
         PickableObject[] objs = this.gameObject.GetComponentsInChildren<PickableObject>();
         foreach (PickableObject obj in objs)
         {
@@ -68,20 +78,6 @@ public class Room : MonoBehaviour
             {
                 obj.OnPickedUp.AddListener(new UnityAction<PickableObject>(RemoveOnPickup));
             }
-        }
-
-        if(AssociatedMapButton != null)
-        {
-            AssociatedMapButton.AssociatedRoom = this;
-        }
-    }
-
-    // Use this for initialization
-    protected virtual void Start ()
-    {
-        if(Locked)
-        {
-            AssociatedMapButton.Lock();
         }
     }
 
@@ -135,8 +131,23 @@ public class Room : MonoBehaviour
         {
             _inRoom = true;
 
-            if (PrevRoom != null)
+            if(NextRoom != null && !NextRoom.PickableAllowed)
             {
+                EquipmentManager.Instance.ButtonBack.GetComponent<BackButton>().ShowAsPuzzle(true);
+                EquipmentManager.Instance.DisplayBackButton(true);
+
+                if(NextRoom.Locked)
+                {
+                    EquipmentManager.Instance.ButtonBack.interactable = false;
+                }
+                else
+                {
+                    EquipmentManager.Instance.ButtonBack.interactable = true;
+                }
+            }
+            else if (PrevRoom != null)
+            {
+                EquipmentManager.Instance.ButtonBack.GetComponent<BackButton>().ShowAsPuzzle(false);
                 EquipmentManager.Instance.DisplayBackButton(true);
             }
             else
@@ -158,9 +169,12 @@ public class Room : MonoBehaviour
         }
     }
 
-    public void UnlockMapButton()
+    public void UnlockMapPart()
     {
-        AssociatedMapButton.Unlock();
+        if(AssociatedMapPart != null)
+        {
+            AssociatedMapPart.Unlock();
+        }
     }
 
     protected virtual void OnInitialize()

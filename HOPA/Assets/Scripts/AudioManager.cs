@@ -12,6 +12,12 @@ public class AudioManager : Singleton<AudioManager>
 
     #region functions
 
+    protected override void Awake()
+    {
+        _destroyOnLoad = false;
+        base.Awake();
+    }
+
     // Use this for initialization
     void Start ()
     {
@@ -30,18 +36,18 @@ public class AudioManager : Singleton<AudioManager>
         MainAudioSource.PlayDelayed(delaySeconds);
     }
 
-    public void ToggleMute()
+    public bool ToggleMute()
     {
         if(IsAudioMuted)
         {
-            MainAudioSource.mute = false;
             IsAudioMuted = false;
         }
         else
         {
-            MainAudioSource.mute = true;
             IsAudioMuted = true;
         }
+        MainAudioSource.mute = IsAudioMuted;
+        return IsAudioMuted;
     }
 
     #endregion

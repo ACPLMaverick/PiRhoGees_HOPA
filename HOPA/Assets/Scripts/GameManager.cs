@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,9 +15,12 @@ public class GameManager : Singleton<GameManager>
     public Room RoomFirstPuzzle;
     public Room RoomSecond;
     public Room RoomSecondPuzzle;
-    public Room RoomThirdPuzzle;
+    public Room RoomThird;
+    public Room RoomFourth;
 
     public Image FadeImage;
+    public ItemInfo ItemInfoGroup;
+    public PauseMenu PauseMenuGroup;
     public Text ClearedText;
     public Text PuzzleSolvedText;
     public float RoomTransitionTime = 2.0f;
@@ -44,7 +48,8 @@ public class GameManager : Singleton<GameManager>
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
         CurrentRoom.Initialize();
         CurrentRoom.Enter();
-        ItemInfoManager.Instance.gameObject.SetActive(false);
+        ItemInfoGroup.gameObject.SetActive(false);
+        PauseMenuGroup.gameObject.SetActive(false);
 	}
 	
 	// Update is called once per frame
@@ -57,6 +62,35 @@ public class GameManager : Singleton<GameManager>
     {
         _nextRoom = room;
         StartCoroutine(StartMoveCoroutine());
+    }
+
+    public void ShowPauseMenu()
+    {
+        PauseMenuGroup.Show();
+    }
+
+    public void ExitGame()
+    {
+        StartCoroutine(ExitGameCoroutine(0));
+    }
+
+    private IEnumerator ExitGameCoroutine(int sceneIndex)
+    {
+        float cTime = Time.time;
+        FadeImage.gameObject.SetActive(true);
+        FadeImage.canvasRenderer.SetAlpha(0.0f);
+
+        while (Time.time - cTime <= RoomTransitionTime * 0.5f)
+        {
+            float lerpValue = (Time.time - cTime) / (RoomTransitionTime * 0.5f);
+            FadeImage.canvasRenderer.SetAlpha(lerpValue);
+            yield return null;
+        }
+        FadeImage.canvasRenderer.SetAlpha(1.0f);
+
+        int cScene = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(0);
+        SceneManager.UnloadScene(cScene);
     }
 
     private IEnumerator StartMoveCoroutine()
@@ -183,7 +217,7 @@ public class GameManager : Singleton<GameManager>
             if(r.NextRoom.Locked)
             {
                 r.NextRoom.Locked = false;
-                r.NextRoom.UnlockMapButton();
+                r.NextRoom.UnlockMapPart();
             }
             TransitionToRoom(r.NextRoom);
         }

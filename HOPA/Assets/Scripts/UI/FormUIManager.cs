@@ -5,15 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class FormUIManager : MonoBehaviour {
 
-    #region constants
-    public const string MaleHeader = "Szanowny Panie";
-    public const string MaleAccusative = "Pana";
-    public const string MaleNominative = "Pan";
-    public const string FemaleHeader = "Szanowna Pani";
-    public const string FemaleAccusative = "Panią";
-    public const string FemaleNominative = "Pani";
-    #endregion
-
     #region public
     public Image LocationBackground;
     public Sprite LocationBackgroundReplacement;
@@ -24,18 +15,11 @@ public class FormUIManager : MonoBehaviour {
     public Toggle MaleToggle;
     public Toggle FemaleToggle;
     public Button ProceedButton;
-
-    public Button LetterButton;
-    public Button LetterBackground;
-    public Text LetterHeaderText;
-    public Text LetterContextText;
-    public Text LetterSecondSideContextText;
     #endregion
 
     #region private
     private string _firstName;
     private string _gender;
-    private bool _isLetterTurned;
     #endregion
 
     #region functions
@@ -70,38 +54,6 @@ public class FormUIManager : MonoBehaviour {
         {
             ProceedButton.interactable = false;
         }
-    }
-
-    public void ShowLetter(string gender)
-    {
-        string tmp = "";
-
-        //TurnOffForm();
-        LetterBackground.gameObject.SetActive(true);
-
-        LetterHeaderText.gameObject.SetActive(true);
-        switch (gender)
-        {
-            case "K":
-                tmp = string.Format(LetterHeaderText.text, FemaleHeader);
-                break;
-            case "M":
-                tmp = string.Format(LetterHeaderText.text, MaleHeader);
-                break;
-        }
-        LetterHeaderText.text = tmp;
-
-        LetterContextText.gameObject.SetActive(true);
-        switch(gender)
-        {
-            case "K":
-                tmp = string.Format(LetterContextText.text, FemaleAccusative, FemaleNominative);
-                break;
-            case "M":
-                tmp = string.Format(LetterContextText.text, MaleAccusative, MaleNominative);
-                break;
-        }
-        LetterContextText.text = tmp;
     }
 
     public void TurnOffForm()
@@ -150,30 +102,11 @@ public class FormUIManager : MonoBehaviour {
         PlayerPrefs.SetString("FirstName", _firstName);
         PlayerPrefs.SetString("Gender", _gender);
 
-        LocationBackground.sprite = LocationBackgroundReplacement;
-        LetterButton.interactable = true;
-        TurnOffForm();
+        //LocationBackground.sprite = LocationBackgroundReplacement;
+        //LetterButton.interactable = true;
+        //TurnOffForm();
+        SceneManager.LoadScene(2);
     }
 
-    public void OnLetterButtonClick()
-    {
-        ShowLetter(PlayerPrefs.GetString("Gender"));
-    }
-
-    public void OnLetterBackgroundClick()
-    {
-        if (!_isLetterTurned)
-        {
-            LetterHeaderText.gameObject.SetActive(false);
-            LetterContextText.gameObject.SetActive(false);
-            LetterBackground.transform.localScale = new Vector3(-1, 1, 1);
-            LetterSecondSideContextText.gameObject.SetActive(true);
-            _isLetterTurned = true;
-        }
-        else
-        {
-            SceneManager.LoadScene(2);
-        }
-    }
     #endregion
 }

@@ -13,8 +13,6 @@ public class CameraManager : Singleton<CameraManager>
     public Camera CameraControlled = null;
     public float CameraMovementRate = 1.0f;
     public float CameraZoomRate = 0.1f;
-    public float CameraZoomMin = 0.1f;
-    public float CameraZoomMax = 3.0f;
 
     #endregion
 
@@ -53,7 +51,7 @@ public class CameraManager : Singleton<CameraManager>
         Room cr = GameManager.Instance.CurrentRoom;
 
         CameraControlled.transform.position = new Vector3(cr.transform.position.x, cr.transform.position.y, CameraControlled.transform.position.z);
-        CameraControlled.orthographicSize = CameraZoomMax;
+        CameraControlled.orthographicSize = GameManager.Instance.CurrentRoom.CameraZoomMax;
         InitCameraBoundaries();
         FixCameraZoomBoundaries();
     }
@@ -104,7 +102,8 @@ public class CameraManager : Singleton<CameraManager>
             return;
         }
 
-        CameraControlled.orthographicSize = Mathf.Clamp(CameraControlled.orthographicSize + amount * CameraZoomRate, CameraZoomMin, CameraZoomMax);
+        CameraControlled.orthographicSize = Mathf.Clamp(CameraControlled.orthographicSize + amount * CameraZoomRate, 
+            GameManager.Instance.CurrentRoom.CameraZoomMin, GameManager.Instance.CurrentRoom.CameraZoomMax);
 
         FixCameraZoomBoundaries();
     }
