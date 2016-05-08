@@ -24,6 +24,7 @@ public class AssignableObject : MonoBehaviour
     #region properties
 
     public bool IsAssigned { get; protected set; }
+    public AssigneeObject CurrentAssignee { get; set; }
 
     #endregion
 
@@ -33,7 +34,8 @@ public class AssignableObject : MonoBehaviour
     protected Vector2 _vMin;
     protected Vector2 _vMax;
     protected TextMesh _textMesh;
-    protected Vector2 _beginPosition;
+    protected Vector3 _beginPosition;
+    protected Vector3 _beginScale;
     protected AssigneeObject _tempAssignee = null;
 
     #endregion
@@ -47,6 +49,7 @@ public class AssignableObject : MonoBehaviour
         // mode is also arbitrarily set to box
 
         AssignedEvent = new AssignableObjectUnityEvent();
+        CurrentAssignee = null;
 
         Room parentRoom = GetComponentInParent<Room>();
         if(parentRoom == null)
@@ -66,6 +69,7 @@ public class AssignableObject : MonoBehaviour
         InputManager.OnInputMoveExclusive += OnDrag;
 
         _beginPosition = GetComponent<Transform>().position;
+        _beginScale = GetComponent<Transform>().localScale;
 
         _textMesh = GetComponentInChildren<TextMesh>();
         _textMesh.GetComponent<Renderer>().sortingLayerID = GetComponent<Renderer>().sortingLayerID;
@@ -80,32 +84,66 @@ public class AssignableObject : MonoBehaviour
 
     protected void OnPickUp(Vector2 screenPos, Collider2D hitCollider2D)
     {
+        if(_isDrag)
+        {
+            GetComponent<Transform>().localScale /= PickedUpScaleMultiplier;
+        }
         if (hitCollider2D != null && hitCollider2D.gameObject == gameObject && !IsAssigned)
         {
-            GetComponent<Transform>().localScale *= PickedUpScaleMultiplier;
+            if (CurrentAssignee != null)
+            {
+                CurrentAssignee.CurrentAssignable = null;
+                CurrentAssignee = null;
+            }
+
+            Transform trans = GetComponent<Transform>();
+            trans.localScale *= PickedUpScaleMultiplier;
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z - 1.0f);
+            trans = _textMesh.GetComponent<Transform>();
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z - 1.0f);
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            sr.sortingOrder = 99;
             _isDrag = true;
         }
     }
 
     protected void OnPutDown(Vector2 screenPos, Collider2D hitCollider2D)
     {
-        if (hitCollider2D != null && hitCollider2D.gameObject == gameObject && !IsAssigned)
+        if ((hitCollider2D != null && hitCollider2D.gameObject == gameObject && !IsAssigned) || _isDrag)
         {
-            GetComponent<Transform>().localScale /= PickedUpScaleMultiplier;
+            Transform trans = GetComponent<Transform>();
+            trans.localScale /= PickedUpScaleMultiplier;
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z + 1.0f);
+            trans = _textMesh.GetComponent<Transform>();
+            trans.localPosition = new Vector3(trans.localPosition.x, trans.localPosition.y, trans.localPosition.z + 1.0f);
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            sr.sortingOrder = 0;
+
+            if (CurrentAssignee != null)
+            {
+                CurrentAssignee.CurrentAssignable = null;
+                CurrentAssignee = null;
+            }
 
             RaycastHit2D[] hits = InputManager.Instance.GetRaycastHitsUnderCursor();
             int l = hits.Length;
 
-            Vector2 lerpTargetPosition = _beginPosition;
-            Vector2 lerpTargetScale = GetComponent<Transform>().localScale;
+            Vector3 lerpTargetPosition = _beginPosition;
+            Vector3 lerpTargetScale = _beginScale;
             AssigneeObject assignee = null;
+
 
             for (int i = 0; i < l; ++i)
             {
-                if(hits[i].collider != null && (assignee = hits[i].collider.GetComponent<AssigneeObject>()) != null)
+                if(hits[i].collider != null && 
+                    (assignee = hits[i].collider.GetComponent<AssigneeObject>()) != null && 
+                    assignee.CurrentAssignable == null)
                 {
                     lerpTargetPosition = assignee.AssignableSnapTransform.position;
                     lerpTargetScale = assignee.AssignableSnapTransform.localScale;
+
+                    assignee.CurrentAssignable = this;
+                    CurrentAssignee = assignee;
 
                     if(assignee == Assignee)
                     {
@@ -116,14 +154,9 @@ public class AssignableObject : MonoBehaviour
                 }
             }
 
+            _isDrag = false;
             StartCoroutine(FlyToPositionCoroutine(GetComponent<Transform>().position, lerpTargetPosition, GetComponent<Transform>().localScale, lerpTargetScale, PutDownPositionFixTimeSeconds));
         }
-        else if(_isDrag)
-        {
-            GetComponent<Transform>().localScale /= PickedUpScaleMultiplier;
-        }
-
-        _isDrag = false;
     }
 
     protected void OnDrag(Vector2 currentScreenPos, Vector2 direction, Collider2D hitCollider2D)
@@ -133,12 +166,13 @@ public class AssignableObject : MonoBehaviour
             Vector3 wp1 = Camera.main.ScreenToWorldPoint(currentScreenPos);
             Vector3 wp2 = Camera.main.ScreenToWorldPoint(currentScreenPos + direction);
             Vector3 deltaP = wp2 - wp1;
+            deltaP.z = 0.0f;
 
             GetComponent<Transform>().position += deltaP;
         }
     }
 
-    protected IEnumerator FlyToPositionCoroutine(Vector2 startPos, Vector2 targetPos, Vector2 startScale, Vector2 targetScale, float timeSeconds)
+    protected IEnumerator FlyToPositionCoroutine(Vector3 startPos, Vector3 targetPos, Vector3 startScale, Vector3 targetScale, float timeSeconds)
     {
         float cTime = Time.time;
         GetComponent<Transform>().position = startPos;
@@ -147,8 +181,8 @@ public class AssignableObject : MonoBehaviour
         while (Time.time - cTime <= timeSeconds)
         {
             float lerpValue = (Time.time - cTime) / timeSeconds;
-            Vector2 finalPos = Vector2.Lerp(startPos, targetPos, lerpValue);
-            Vector2 finalScale = Vector2.Lerp(startScale, targetScale, lerpValue);
+            Vector3 finalPos = Vector3.Lerp(startPos, targetPos, lerpValue);
+            Vector3 finalScale = Vector3.Lerp(startScale, targetScale, lerpValue);
             GetComponent<Transform>().position = finalPos;
             GetComponent<Transform>().localScale = finalScale;
             yield return null;

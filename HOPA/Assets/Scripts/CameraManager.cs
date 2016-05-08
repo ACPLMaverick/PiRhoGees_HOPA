@@ -21,6 +21,16 @@ public class CameraManager : Singleton<CameraManager>
     private Vector2 _bMin;
     private Vector2 _bMax;
 
+    private string[] _allowedSortingLayerNames = 
+    {
+        "BackgroundNear",
+        "BackgroundCenter",
+        "BackgroundFar",
+        "BackgroundVeryNear",
+        "BackgroundNearest"
+    };
+
+
     #endregion
 
     #region functions
@@ -81,7 +91,7 @@ public class CameraManager : Singleton<CameraManager>
 
         // check if we point the background or other object
         // we hit other object or nothing - return
-        if (hitCollider.gameObject != GameManager.Instance.CurrentRoom.gameObject || !Enabled)
+        if (hitCollider == null || !SortingLayerAllowed(hitCollider) || !Enabled)
         {
             return;
         }
@@ -93,6 +103,21 @@ public class CameraManager : Singleton<CameraManager>
         CameraControlled.transform.position += - deltaP * CameraMovementRate;
 
         FixCameraPositionBoundaries();
+    }
+
+    private bool SortingLayerAllowed(Collider2D collider)
+    {
+        SpriteRenderer sr = collider.GetComponent<SpriteRenderer>();
+        string lName = sr.sortingLayerName;
+
+        foreach(string name in _allowedSortingLayerNames)
+        {
+            if(name.Equals(lName))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void ZoomCamera(float amount)

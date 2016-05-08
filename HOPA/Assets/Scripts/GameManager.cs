@@ -15,7 +15,8 @@ public class GameManager : Singleton<GameManager>
     public Room RoomFirstPuzzle;
     public Room RoomSecond;
     public Room RoomSecondPuzzle;
-    public Room RoomThirdPuzzle;
+    public Room RoomThird;
+    public Room RoomFourth;
 
     public Image FadeImage;
     public ItemInfo ItemInfoGroup;
@@ -130,14 +131,19 @@ public class GameManager : Singleton<GameManager>
         CurrentRoom.Leave();
 
         CurrentRoom = _nextRoom;
-        _nextRoom = CurrentRoom.NextRoom;
+        _nextRoom = CurrentRoom.PuzzleRoom;
 
         CurrentRoom.Initialize();   // nothing will happen if already initialized
         CurrentRoom.Enter();
 
         CameraManager.Instance.RecalculateToCurrentRoom();
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
-        EquipmentManager.Instance.FlushOnNextRoom();
+
+        if(CurrentRoom.ParentRoom == null)
+        {
+            EquipmentManager.Instance.FlushOnNextRoom();
+        }
+
         StartCoroutine(EndMoveCoroutine());
     }
 
@@ -211,14 +217,14 @@ public class GameManager : Singleton<GameManager>
 
         //r.Leave();
 
-        if (r.NextRoom != null)
+        if (r.PuzzleRoom != null)
         {
-            if(r.NextRoom.Locked)
+            if(r.PuzzleRoom.Locked)
             {
-                r.NextRoom.Locked = false;
-                r.NextRoom.UnlockMapPart();
+                r.PuzzleRoom.Locked = false;
+                r.PuzzleRoom.UnlockMapPart();
             }
-            TransitionToRoom(r.NextRoom);
+            TransitionToRoom(r.PuzzleRoom);
         }
         else
         {

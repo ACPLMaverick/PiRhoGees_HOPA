@@ -12,6 +12,7 @@ public class AssigneeObject : MonoBehaviour {
     #region properties
 
     public Transform AssignableSnapTransform { get; private set; }
+    public AssignableObject CurrentAssignable { get; set; }
 
     #endregion
 
@@ -21,6 +22,7 @@ public class AssigneeObject : MonoBehaviour {
     void Start ()
     {
         AssignableSnapTransform = GetComponentsInChildren<Transform>()[1];
+        CurrentAssignable = null;
 	}
 	
 	// Update is called once per frame

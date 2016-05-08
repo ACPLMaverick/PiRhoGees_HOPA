@@ -46,11 +46,25 @@ public class PickableObject : MonoBehaviour
             _associatedListElement.onClick.AddListener(_actionOnListElementClick);
         }
     }
+    public bool FrameLocked
+    {
+        get
+        {
+            return _frameLocked;
+        }
+        set
+        {
+            _frameLockedHelper = value;
+        }
+    }
+
 
     #endregion
 
     #region protected
 
+    protected bool _frameLocked = false;
+    protected bool _frameLockedHelper = false;
     protected Button _associatedListElement;
     protected bool _picked = false;
     protected UnityAction _actionOnListElementClick;
@@ -74,7 +88,10 @@ public class PickableObject : MonoBehaviour
 	// Update is called once per frame
 	protected virtual void Update ()
     {
-	
+	    if(_frameLockedHelper != _frameLocked)
+        {
+            _frameLocked = _frameLockedHelper;
+        }
 	}
 
     protected virtual void OnListElementClick()
@@ -84,7 +101,7 @@ public class PickableObject : MonoBehaviour
 
     protected virtual void PickUp(Vector2 position, Collider2D col)
     {
-        if (col != null && col.gameObject == this.gameObject && !_picked)
+        if (col != null && col.gameObject == this.gameObject && !_picked && !_frameLocked)
         {
             col.gameObject.transform.SetParent(Camera.main.transform, true);
             Vector3 tgt = Vector3.zero, scl = Vector3.zero;
@@ -118,9 +135,8 @@ public class PickableObject : MonoBehaviour
     {
         if(AssociatedListElement != null)
         {
-            AssociatedListElement.GetComponent<Text>().fontStyle = FontStyle.BoldAndItalic;
+            EquipmentManager.Instance.ChangeTextToPicked(AssociatedListElement.GetComponent<Text>());
             AssociatedListElement.GetComponent<Button>().onClick.RemoveListener(_actionOnListElementClick);
-            AssociatedListElement.GetComponent<Button>().interactable = false;
         }
         GameObject.DestroyImmediate(this.gameObject);
     }

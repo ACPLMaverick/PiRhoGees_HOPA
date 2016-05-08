@@ -41,16 +41,16 @@ public class BackButton : MonoBehaviour
     {
         if(_isPuzzle)
         {
-            if (GameManager.Instance.CurrentRoom.NextRoom != null)
+            if (GameManager.Instance.CurrentRoom.PuzzleRoom != null)
             {
-                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.NextRoom);
+                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.PuzzleRoom);
             }
         }
         else
         {
-            if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+            if (GameManager.Instance.CurrentRoom.ParentRoom != null)
             {
-                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.PrevRoom);
+                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.ParentRoom);
             }
         }
     }

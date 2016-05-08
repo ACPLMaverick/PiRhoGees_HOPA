@@ -88,10 +88,11 @@ public class Map : PickableUsableObject
 
         foreach(Room room in RoomsOnMap)
         {
-            GameObject container = (GameObject)Instantiate(MapElementPrefab, r.position, Quaternion.identity);
-            container.transform.SetParent(_mapButtonsGroup.transform, true);
+            GameObject container = (GameObject)Instantiate(MapElementPrefab, Vector3.zero, Quaternion.identity);
+            container.transform.SetParent(_mapButtonsGroup.transform, false);
 
             RectTransform tr = container.GetComponent<RectTransform>();
+            tr.localScale = Vector3.one;
             tr.sizeDelta = r.sizeDelta;
             tr.localPosition += new Vector3(d.x, d.y, 0.0f);
 
@@ -167,7 +168,7 @@ public class Map : PickableUsableObject
             _currentMapPosition = nextPosition;
 
             Vector2 finalMovement;
-            finalMovement.x = direction.x * -_movementOneClick.x;
+            finalMovement.x = direction.x * -_movementOneClick.x * _mapTitle.canvas.scaleFactor;
             finalMovement.y = direction.y * -_movementOneClick.y;
 
             RectTransform r = _mapButtonsGroup.GetComponent<RectTransform>();
@@ -222,9 +223,9 @@ public class Map : PickableUsableObject
 
     public void ShowMap()
     {
-        if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+        if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            EquipmentManager.Instance.DisplayBackButton(false);
+            EquipmentManager.Instance.DisplayBackButton(false, EquipmentManager.Instance.ButtonBack.interactable);
         }
         MapObject.gameObject.SetActive(true);
         StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
@@ -234,9 +235,9 @@ public class Map : PickableUsableObject
 
     public void HideMap()
     {
-        if (GameManager.Instance.CurrentRoom.PrevRoom != null)
+        if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            EquipmentManager.Instance.DisplayBackButton(true);
+            EquipmentManager.Instance.DisplayBackButton(true, EquipmentManager.Instance.ButtonBack.interactable);
         }
         StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, false));
         _isEnabled = false;

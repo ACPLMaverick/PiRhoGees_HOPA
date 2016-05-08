@@ -19,8 +19,9 @@ public class Room : MonoBehaviour
     public string Name;
     public string Description;
     public Sprite MapSprite;
-    public Room NextRoom = null;
-    public Room PrevRoom = null;
+    public Room PuzzleRoom = null;
+    public Room ParentRoom = null;                // not necessary to be set if it is set when Room is assigned as child somewhere else
+    public List<Room> ChildRooms;
     public float CameraZoomMin = 0.1f;
     public float CameraZoomMax = 3.0f;
     public bool PickableAllowed = true;
@@ -31,7 +32,7 @@ public class Room : MonoBehaviour
 
     #region properties
 
-    public List<PickableObject> PickablePickedObjects { get; private set; }
+    public List<uint> PickablePickedObjectIDs { get; private set; }
     public List<PickableObject> PickableObjects { get; private set; }
     public List<PickableUsableObject> PickableUsableObjects { get; private set; }
 
@@ -55,31 +56,22 @@ public class Room : MonoBehaviour
         InitializeEvent = new RoomUnityEvent();
 
         PickableObjects = new List<PickableObject>();
-        PickablePickedObjects = new List<PickableObject>();
+        PickablePickedObjectIDs = new List<uint>();
         PickableUsableObjects = new List<PickableUsableObject>();
-        PickableObject[] objs = this.gameObject.GetComponentsInChildren<PickableObject>();
-        foreach (PickableObject obj in objs)
-        {
-            if (obj.GetType() == typeof(PickableObject))
-            {
-                PickableObjects.Add(obj);
-            }
-            else if (obj.GetType() == typeof(PickableUsableObject))
-            {
-                PickableUsableObjects.Add((PickableUsableObject)obj);
-            }
-
-            if (PickableAllowed)
-            {
-                obj.OnPickedUp.AddListener(new UnityAction<PickableObject>(RemoveOnPickup));
-            }
-        }
     }
 
     // Use this for initialization
     protected virtual void Start ()
     {
+        PickableObject[] objs = GetComponentsInChildren<PickableObject>();
+        AssignPickables(objs);
 
+        foreach(Room r in ChildRooms)
+        {
+            objs = r.GetComponentsInChildren<PickableObject>();
+            AssignPickables(objs);
+            r.ParentRoom = this;
+        }
     }
 
     // Update is called once per frame
@@ -93,9 +85,9 @@ public class Room : MonoBehaviour
         if (obj.GetType() == typeof(PickableObject))
         {
             //PickableObjects.Remove(obj);
-            PickablePickedObjects.Add(obj);
+            PickablePickedObjectIDs.Add(obj.ID);
 
-            if(PickableObjects.Count == PickablePickedObjects.Count)
+            if(PickableObjects.Count == PickablePickedObjectIDs.Count)
             {
                 Finish();
             }
@@ -132,28 +124,27 @@ public class Room : MonoBehaviour
         {
             _inRoom = true;
 
-            if(NextRoom != null && !NextRoom.PickableAllowed)
+            if(PuzzleRoom != null && !PuzzleRoom.PickableAllowed)
             {
                 EquipmentManager.Instance.ButtonBack.GetComponent<BackButton>().ShowAsPuzzle(true);
-                EquipmentManager.Instance.DisplayBackButton(true);
-
-                if(NextRoom.Locked)
+                
+                if(PuzzleRoom.Locked)
                 {
-                    EquipmentManager.Instance.ButtonBack.interactable = false;
+                    EquipmentManager.Instance.DisplayBackButton(true, false);
                 }
                 else
                 {
-                    EquipmentManager.Instance.ButtonBack.interactable = true;
+                    EquipmentManager.Instance.DisplayBackButton(true, true);
                 }
             }
-            else if (PrevRoom != null)
+            else if (ParentRoom != null)
             {
                 EquipmentManager.Instance.ButtonBack.GetComponent<BackButton>().ShowAsPuzzle(false);
-                EquipmentManager.Instance.DisplayBackButton(true);
+                EquipmentManager.Instance.DisplayBackButton(true, true);
             }
             else
             {
-                EquipmentManager.Instance.DisplayBackButton(false);
+                EquipmentManager.Instance.DisplayBackButton(false, false);
             }
 
             OnEntered();
@@ -172,7 +163,10 @@ public class Room : MonoBehaviour
 
     public void UnlockMapPart()
     {
-        AssociatedMapPart.Unlock();
+        if(AssociatedMapPart != null)
+        {
+            AssociatedMapPart.Unlock();
+        }
     }
 
     protected virtual void OnInitialize()
@@ -193,5 +187,25 @@ public class Room : MonoBehaviour
     protected virtual void OnLeft()
     {
 
+    }
+
+    protected void AssignPickables(PickableObject[] array)
+    {
+        foreach (PickableObject obj in array)
+        {
+            if (obj.GetType() == typeof(PickableObject))
+            {
+                PickableObjects.Add(obj);
+            }
+            else if (obj.GetType() == typeof(PickableUsableObject))
+            {
+                PickableUsableObjects.Add((PickableUsableObject)obj);
+            }
+
+            if (PickableAllowed)
+            {
+                obj.OnPickedUp.AddListener(new UnityAction<PickableObject>(RemoveOnPickup));
+            }
+        }
     }
 }
