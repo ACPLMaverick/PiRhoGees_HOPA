@@ -118,9 +118,19 @@ public class Map : PickableUsableObject
         MapObject.gameObject.SetActive(false);
         MapObject.alpha = 0.0f;
     }
-	
-	// Update is called once per frame
-	override protected void Update ()
+
+    protected override void PickUp(Vector2 position, Collider2D col)
+    {
+        if (col != null && col.gameObject == this.gameObject && EquipmentManager.Instance.EquipmentFreeContainersAvailable && !_picked)
+        {
+            TutorialManager.Instance.GoStepFurther();
+        }
+
+        base.PickUp(position, col);
+    }
+
+    // Update is called once per frame
+    override protected void Update ()
     {
         base.Update();
 	}
@@ -183,6 +193,9 @@ public class Map : PickableUsableObject
 
         if(_isEnabled)
         {
+            TutorialManager.Instance.HideCurrentMessage();
+
+            //Inside transition coroutine hides approaching of another tutorial message
             GameManager.Instance.TransitionToRoom(mp.AssociatedRoom);
             HideMap();
         }
@@ -231,6 +244,11 @@ public class Map : PickableUsableObject
         StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
         AudioManager.Instance.PlayClip(SoundUnfold, 0.0f);
         InputManager.Instance.InputAllEventsEnabled = false;
+
+        if(TutorialManager.Instance.IsEnabled)
+        {
+            TutorialManager.Instance.GoStepFurther();
+        }
     }
 
     public void HideMap()

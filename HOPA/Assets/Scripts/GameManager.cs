@@ -108,6 +108,9 @@ public class GameManager : Singleton<GameManager>
         FadeImage.canvasRenderer.SetAlpha(1.0f);
         MoveToCurrentRoom();
 
+        //Thanks to this, tutorial message will appear when screen fades out
+        TutorialManager.Instance.GoStepFurther();
+
         yield return null;
     }
 

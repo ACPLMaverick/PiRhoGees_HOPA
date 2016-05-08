@@ -75,10 +75,24 @@ public class TutorialManager : Singleton<TutorialManager> {
         IsEnabled = false;
     }
 
+    public void HideCurrentMessage()
+    {
+        TutorialMessages[_currentTutorialStep].SetActive(false);
+    }
+
     public void GoStepFurther()
     {
         _currentTutorialStep++;
         _stepHasChanged = true;
+    }
+
+    public void GoStepFurther(int i)
+    {
+        if(_currentTutorialStep == i - 1)
+        {
+            _currentTutorialStep = i;
+            _stepHasChanged = true;
+        }
     }
 
     #endregion

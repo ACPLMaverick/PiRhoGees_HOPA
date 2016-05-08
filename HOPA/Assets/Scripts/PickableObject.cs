@@ -97,6 +97,8 @@ public class PickableObject : MonoBehaviour
     protected virtual void OnListElementClick()
     {
         GameManager.Instance.ItemInfoGroup.Show(GetComponent<SpriteRenderer>().sprite, Name, Description);
+
+        TutorialManager.Instance.GoStepFurther();
     }
 
     protected virtual void PickUp(Vector2 position, Collider2D col)
