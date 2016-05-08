@@ -59,6 +59,7 @@ public class Letter : PickableObject {
             _picked = true;
 
             ShowLetter(PlayerPrefs.GetString("Gender"));
+            TutorialManager.Instance.GoStepFurther();
         }
     }
 
@@ -110,6 +111,8 @@ public class Letter : PickableObject {
             LetterSecondSideContextText.gameObject.SetActive(false);
             Destroy(gameObject);
         }
+
+        TutorialManager.Instance.GoStepFurther();
     }
     #endregion
 }

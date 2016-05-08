@@ -8,6 +8,7 @@ public class UIEvents : MonoBehaviour {
     public GameObject OptionsPanel;
     public GameObject CreditsPanel;
     public GameObject QuitPanel;
+    public GameObject TutorialPanel;
 
     #endregion
   
@@ -18,6 +19,7 @@ public class UIEvents : MonoBehaviour {
         {
             OptionsPanel.SetActive(false);
             CreditsPanel.SetActive(false);
+            TutorialPanel.SetActive(false);
             QuitPanel.SetActive(true);
         }
     }
@@ -31,7 +33,8 @@ public class UIEvents : MonoBehaviour {
 
     public void OnStartGameClick()
     {
-        SceneManager.LoadScene(1);
+        TutorialPanel.SetActive(true);
+        //SceneManager.LoadScene(1);
     }
 
     public void OnOptionsClick()
@@ -67,6 +70,16 @@ public class UIEvents : MonoBehaviour {
     public void OnNoClick()
     {
         QuitPanel.SetActive(false);
+    }
+
+    #endregion
+
+    #region Tutorial Panel Events
+
+    public void OnTutorialClick(int value)
+    {
+        PlayerPrefs.SetInt("Tutorial", value);
+        SceneManager.LoadScene(1);
     }
 
     #endregion
