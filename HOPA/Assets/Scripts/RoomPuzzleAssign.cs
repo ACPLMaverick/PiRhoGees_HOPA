@@ -12,6 +12,13 @@ public class RoomPuzzleAssign : Room
 
     #endregion
 
+    #region public
+
+    //Set only for second puzzle room
+    public GameObject[] Questions;
+
+    #endregion
+
     #region functions
 
     // Use this for initialization
@@ -25,7 +32,23 @@ public class RoomPuzzleAssign : Room
         {
             _assignables[i].AssignedEvent.AddListener(new UnityEngine.Events.UnityAction<AssignableObject>(OnAssigned));
         }
-	}
+
+        if (Questions.Length > 0)
+        {
+            for (int j = 0; j < Questions.Length; ++j)
+            {
+                for (int k = 0; k < Questions[j].GetComponentsInChildren<AssignableObject>().Length; ++k)
+                {
+                    Questions[j].GetComponentsInChildren<AssignableObject>()[k].AssignedEvent = new AssignableObjectUnityEvent();
+                    Questions[j].GetComponentsInChildren<AssignableObject>()[k].AssignedEvent.AddListener(new UnityEngine.Events.UnityAction<AssignableObject>(OnAssigned));
+                }
+            }
+
+            Questions[1].SetActive(false);
+            Questions[2].SetActive(false);
+            Questions[3].SetActive(false);
+        }
+    }
 	
 	// Update is called once per frame
 	protected override void Update ()
@@ -36,7 +59,19 @@ public class RoomPuzzleAssign : Room
     protected void OnAssigned(AssignableObject asg)
     {
         ++_assigned;
-        if (_assigned == _assignableCount)
+
+        if(Questions.Length != 0 && _assigned < 4)
+        {
+            int _a_tmp = _assigned - 1;
+
+            Questions[_a_tmp].SetActive(false);
+            Questions[_assigned].SetActive(true);
+
+            _assignables = GetComponentsInChildren<AssignableObject>();
+        }
+
+        //if (_assigned == _assignableCount)
+        if(_assigned == 4)
         {
             FinishedEvent.Invoke(this);
         }

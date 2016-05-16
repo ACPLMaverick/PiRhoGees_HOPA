@@ -38,6 +38,8 @@ public class GameManager : Singleton<GameManager>
     {
         RoomFirst.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
         RoomFirstPuzzle.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomAssignPuzzleFinished));
+        RoomSecond.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
+        RoomSecondPuzzle.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomAssignPuzzleFinished));
 
         ClearedText.GetComponent<CanvasGroup>().alpha = 0.0f;
         ClearedText.gameObject.SetActive(false);

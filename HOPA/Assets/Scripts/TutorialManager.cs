@@ -77,7 +77,8 @@ public class TutorialManager : Singleton<TutorialManager> {
 
     public void HideCurrentMessage()
     {
-        TutorialMessages[_currentTutorialStep].SetActive(false);
+        if(IsEnabled)
+            TutorialMessages[_currentTutorialStep].SetActive(false);
     }
 
     public void GoStepFurther()
