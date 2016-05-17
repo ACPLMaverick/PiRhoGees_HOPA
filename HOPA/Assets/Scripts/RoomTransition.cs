@@ -19,7 +19,7 @@ public class RoomTransition : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-        InputManager.OnInputClickUp += OnClickUp;
+        InputManager.Instance.OnInputClickUp.AddListener(OnClickUp);
 	}
 	
 	// Update is called once per frame

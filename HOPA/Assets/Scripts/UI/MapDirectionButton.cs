@@ -9,7 +9,7 @@ public class MapDirectionButton : MonoBehaviour {
 
     #region public
 
-    public Map.MapMovementDirection AssociatedDirection;
+    public InputManager.SwipeDirection AssociatedDirection;
     public UnityEvent<MapDirectionButton> ClickedEvent;
 
     #endregion

@@ -44,8 +44,8 @@ public class CameraManager : Singleton<CameraManager>
 
         // register for events
 
-        InputManager.OnInputMoveExclusive += MoveCamera;
-        InputManager.OnInputZoom += ZoomCamera;
+        InputManager.Instance.OnInputMoveExclusive.AddListener(MoveCamera);
+        InputManager.Instance.OnInputZoom.AddListener(ZoomCamera);
 
         RecalculateToCurrentRoom();
     }

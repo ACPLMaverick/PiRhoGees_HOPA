@@ -64,9 +64,9 @@ public class AssignableObject : MonoBehaviour
         _vMax = bgTransform.localToWorldMatrix * bgSprite.sprite.rect.max;
 
         // assigning callback functions to inputmanager events
-        InputManager.OnInputClickDown += OnPickUp;
-        InputManager.OnInputClickUp += OnPutDown;
-        InputManager.OnInputMoveExclusive += OnDrag;
+        InputManager.Instance.OnInputClickDown.AddListener(OnPickUp);
+        InputManager.Instance.OnInputClickUp.AddListener(OnPutDown);
+        InputManager.Instance.OnInputMoveExclusive.AddListener(OnDrag);
 
         _beginPosition = GetComponent<Transform>().position;
         _beginScale = GetComponent<Transform>().localScale;

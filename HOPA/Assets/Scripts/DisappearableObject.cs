@@ -66,7 +66,7 @@ public class DisappearableObject : MonoBehaviour
             po[i].FrameLocked = true;
         }
 
-        InputManager.OnInputClickUp += OnClickUp;
+        InputManager.Instance.OnInputClickUp.AddListener(OnClickUp);
 	}
 	
 	// Update is called once per frame
@@ -74,11 +74,6 @@ public class DisappearableObject : MonoBehaviour
     {
 	
 	}
-
-    protected virtual void OnDestroy()
-    {
-        InputManager.OnInputClickUp -= OnClickUp;
-    }
 
     protected virtual void OnClickUp(Vector2 screenPos, Collider2D hitCollider2D)
     {
@@ -165,6 +160,7 @@ public class DisappearableObject : MonoBehaviour
 
         if (destroy)
         {
+            InputManager.Instance.OnInputClickUp.RemoveListener(OnClickUp);
             DestroyImmediate(gameObject);
         }
         else

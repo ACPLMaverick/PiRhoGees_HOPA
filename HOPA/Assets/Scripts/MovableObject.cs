@@ -43,7 +43,7 @@ public class MovableObject : MonoBehaviour
             throw new System.Exception("Error: one or more necessary child objects are not present.");
         }
 
-        InputManager.OnInputMoveExclusive += MoveObject;
+        InputManager.Instance.OnInputMoveExclusive.AddListener(MoveObject);
 	}
 
     // Update is called once per frame

@@ -82,7 +82,7 @@ public class PickableObject : MonoBehaviour
     // Use this for initialization
     protected virtual void Start ()
     {
-        InputManager.OnInputClickDown += PickUp;
+        InputManager.Instance.OnInputClickDown.AddListener(PickUp);
 	}
 	
 	// Update is called once per frame
@@ -122,7 +122,7 @@ public class PickableObject : MonoBehaviour
 
 
             EquipmentManager.Instance.AddObjectToList(this, FADE_OUT_TIME_SEC);
-            InputManager.OnInputClickDown -= PickUp;
+            InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);
             //col.gameObject.transform.SetParent(Camera.main.transform, true);
 
             _picked = true;

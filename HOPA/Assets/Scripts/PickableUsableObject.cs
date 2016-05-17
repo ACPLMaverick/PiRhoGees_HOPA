@@ -82,7 +82,7 @@ public class PickableUsableObject : PickableObject
 
 
             EquipmentManager.Instance.AddObjectToPool(this, FADE_OUT_TIME_SEC);
-            InputManager.OnInputClickDown -= PickUp;
+            InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);
 
             _picked = true;
             OnPickedUp.Invoke(this);

@@ -7,16 +7,6 @@ using System;
 
 public class Map : PickableUsableObject
 {
-    #region enum
-
-    public enum MapMovementDirection
-    {
-        RIGHT,
-        LEFT
-    };
-
-    #endregion
-
     #region public
 
     public CanvasGroup MapObject;
@@ -33,8 +23,8 @@ public class Map : PickableUsableObject
     private List<MapPart> _mapParts;
     private CanvasGroup _mapButtonsGroup;
     private Image _mapTitle;
-    private MapDirectionButton _directionButtonLeft;
-    private MapDirectionButton _directionButtonRight;
+    private MapEdgeFade _fadeLeft;
+    private MapEdgeFade _fadeRight;
     //private Button _exitButton;
     private Vector2 _movementOneClick;
     private bool _isEnabled = false;
@@ -57,27 +47,21 @@ public class Map : PickableUsableObject
         Button[] buttons = MapObject.gameObject.GetComponentsInChildren<Button>();
         int count = buttons.Length;
 
-        _mapButtonsGroup = MapObject.gameObject.GetComponentsInChildren<CanvasGroup>()[1];
-        _mapTitle = _mapButtonsGroup.gameObject.GetComponentsInChildren<Image>()[1];
-
-        for(int i = 0; i < count; ++i)
+        for (int i = 0; i < count; ++i)
         {
             if(buttons[i].name.Contains("MapButtonBack"))
             {
                 //_exitButton = buttons[i];
                 buttons[i].onClick.AddListener(new UnityAction(HideMap));
             }
-            else if(buttons[i].name.Contains("MapDirectionButtonLeft"))
-            {
-                _directionButtonLeft = buttons[i].GetComponent<MapDirectionButton>();
-                _directionButtonLeft.ClickedEvent.AddListener(new UnityAction<MapDirectionButton>(OnDirectionButtonClick));
-            }
-            else if (buttons[i].name.Contains("MapDirectionButtonRight"))
-            {
-                _directionButtonRight = buttons[i].GetComponent<MapDirectionButton>();
-                _directionButtonRight.ClickedEvent.AddListener(new UnityAction<MapDirectionButton>(OnDirectionButtonClick));
-            }
         }
+
+        _mapButtonsGroup = MapObject.gameObject.GetComponentsInChildren<CanvasGroup>()[1];
+        _mapTitle = _mapButtonsGroup.gameObject.GetComponentsInChildren<Image>()[1];
+
+        MapEdgeFade[] fades = MapObject.gameObject.GetComponentsInChildren<MapEdgeFade>();
+        _fadeLeft = fades[0];
+        _fadeRight = fades[1];
 
         // calculate movementOneClick and scale factor
         RectTransform r = _mapTitle.GetComponent<RectTransform>();
@@ -112,8 +96,9 @@ public class Map : PickableUsableObject
             d.x += _movementOneClick.x;
         }
 
-        _directionButtonLeft.GetComponent<Button>().interactable = false;
-        _directionButtonRight.GetComponent<Button>().interactable = true;
+        InputManager.Instance.OnInputSwipe.AddListener(MoveInDirection);
+
+        _fadeLeft.HideImmediate();
 
         MapObject.gameObject.SetActive(false);
         MapObject.alpha = 0.0f;
@@ -135,9 +120,9 @@ public class Map : PickableUsableObject
         base.Update();
 	}
 
-    public void OnDirectionButtonClick(MapDirectionButton directionEnum)
+    protected void MoveInDirection(InputManager.SwipeDirection dirEnum, float length, Collider2D col)
     {
-        if(!_isEnabled)
+        if(!_isEnabled || dirEnum == InputManager.SwipeDirection.UP || dirEnum == InputManager.SwipeDirection.DOWN)
         {
             return;
         }
@@ -145,13 +130,13 @@ public class Map : PickableUsableObject
         Vector2 direction = Vector2.zero;
         int nextPosition = _currentMapPosition;
 
-        switch (directionEnum.AssociatedDirection)
+        switch (dirEnum)
         {
-            case MapMovementDirection.LEFT:
+            case InputManager.SwipeDirection.LEFT:
                 --nextPosition;
                 direction = Vector2.left;
                 break;
-            case MapMovementDirection.RIGHT:
+            case InputManager.SwipeDirection.RIGHT:
                 ++nextPosition;
                 direction = Vector2.right;
                 break;
@@ -159,21 +144,7 @@ public class Map : PickableUsableObject
 
         if (nextPosition >= 0 && nextPosition < _totalMapLength)
         {
-            if(nextPosition == 0)
-            {
-                _directionButtonLeft.GetComponent<Button>().interactable = false;
-                _directionButtonRight.GetComponent<Button>().interactable = true;
-            }
-            else if(nextPosition == _totalMapLength - 1)
-            {
-                _directionButtonLeft.GetComponent<Button>().interactable = true;
-                _directionButtonRight.GetComponent<Button>().interactable = false;
-            }
-            else
-            {
-                _directionButtonLeft.GetComponent<Button>().interactable = true;
-                _directionButtonRight.GetComponent<Button>().interactable = true;
-            }
+            SetEdgeFadeOnPosition(nextPosition);
 
             _currentMapPosition = nextPosition;
 
@@ -184,6 +155,25 @@ public class Map : PickableUsableObject
             RectTransform r = _mapButtonsGroup.GetComponent<RectTransform>();
             finalMovement = new Vector2(r.position.x, r.position.y) + finalMovement;
             StartCoroutine(MapMovementCoroutine(r, r.position, finalMovement, 0.5f));
+        }
+    }
+
+    protected void SetEdgeFadeOnPosition(int position)
+    {
+        if (position == 0)
+        {
+            _fadeLeft.Hide();
+            _fadeRight.Show();
+        }
+        else if (position == _totalMapLength - 1)
+        {
+            _fadeLeft.Show();
+            _fadeRight.Hide();
+        }
+        else
+        {
+            _fadeLeft.Show();
+            _fadeRight.Show();
         }
     }
 
@@ -201,39 +191,6 @@ public class Map : PickableUsableObject
         }
     }
 
-    //protected void UpdateMapPositionOnDirectionButtons()
-    //{
-    //    Int2 delta = new Int2(0, 0);
-    //    foreach(MapDirectionButton b in _directionButtons)
-    //    {
-    //        switch (b.AssociatedDirection)
-    //        {
-    //            case MapMovementDirection.DOWN:
-    //                delta = new Int2(0, 1);
-    //                break;
-    //            case MapMovementDirection.LEFT:
-    //                delta = new Int2(-1, 0);
-    //                break;
-    //            case MapMovementDirection.RIGHT:
-    //                delta = new Int2(1, 0);
-    //                break;
-    //            case MapMovementDirection.UP:
-    //                delta = new Int2(0, -1);
-    //                break;
-    //        }
-
-    //        delta += _currentPositionInArray;
-    //        if(_positionArray[delta.x, delta.y] != 2)
-    //        {
-    //            b.GetComponent<Button>().interactable = true;
-    //        }
-    //        else
-    //        {
-    //            b.GetComponent<Button>().interactable = false;
-    //        }
-    //    }
-    //}
-
     public void ShowMap()
     {
         if (GameManager.Instance.CurrentRoom.ParentRoom != null)
@@ -241,7 +198,8 @@ public class Map : PickableUsableObject
             EquipmentManager.Instance.DisplayBackButton(false, EquipmentManager.Instance.ButtonBack.interactable);
         }
         MapObject.gameObject.SetActive(true);
-        StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, true));
+        SetEdgeFadeOnPosition(_currentMapPosition);
+        StartCoroutine(MapVisibilityCoroutine(1.0f, 1.0f, false, true));
         AudioManager.Instance.PlayClip(SoundUnfold, 0.0f);
         InputManager.Instance.InputAllEventsEnabled = false;
 
@@ -257,7 +215,7 @@ public class Map : PickableUsableObject
         {
             EquipmentManager.Instance.DisplayBackButton(true, EquipmentManager.Instance.ButtonBack.interactable);
         }
-        StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, false));
+        StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, true, false));
         _isEnabled = false;
         AudioManager.Instance.PlayClip(SoundFold, 0.0f);
     }
@@ -281,7 +239,7 @@ public class Map : PickableUsableObject
         yield return null;
     }
 
-    protected IEnumerator MapVisibilityCoroutine(float timeSeconds, float targetOpacity, bool isUsableOnFinal)
+    protected IEnumerator MapVisibilityCoroutine(float timeSeconds, float targetOpacity, bool influenceActivity, bool isUsableOnFinal)
     {
         float cTime = Time.time;
         float startOpacity = MapObject.alpha;
@@ -294,7 +252,10 @@ public class Map : PickableUsableObject
             yield return null;
         }
         MapObject.alpha = targetOpacity;
-        MapObject.gameObject.SetActive(isUsableOnFinal);
+        if(influenceActivity)
+        {
+            MapObject.gameObject.SetActive(isUsableOnFinal);
+        }
         _isEnabled = isUsableOnFinal;
 
         if(!_isEnabled)

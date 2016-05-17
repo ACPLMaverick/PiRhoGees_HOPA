@@ -41,7 +41,7 @@ public class Letter : PickableObject {
         if (col != null && col.gameObject == this.gameObject && !_picked)
         {
             col.gameObject.transform.SetParent(Camera.main.transform, true);
-            Vector3 tgt = Vector3.zero, scl = Vector3.zero;
+            Vector3 tgt = Vector3.zero/*, scl = Vector3.zero*/;
 
             if (EquipmentManager.Instance.CurrentMode == EquipmentManager.EquipmentMode.PICKABLES)
             {
@@ -55,7 +55,7 @@ public class Letter : PickableObject {
 
             //StartCoroutine(FlyToTarget(tgt, scl, FADE_OUT_TIME_SEC));
 
-            InputManager.OnInputClickDown -= PickUp;
+            InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);
             _picked = true;
 
             ShowLetter(PlayerPrefs.GetString("Gender"));

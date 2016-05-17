@@ -45,7 +45,7 @@ public class ItemInfo : MonoBehaviour
     public void Show(Sprite sprite, string title, string text)
     {
         gameObject.SetActive(true);
-        StartCoroutine(FadeCoroutine(0.0f, 1.0f, 0.65f, true));
+        StartCoroutine(Utility.FadeCoroutineUI(_grp, 0.0f, 1.0f, 0.65f, true));
         _img.sprite = sprite;
         Vector2 nSizeDelta = _defSizeDelta;
         Vector2 nBounds = sprite.bounds.extents;
@@ -64,26 +64,7 @@ public class ItemInfo : MonoBehaviour
 
     private void OnBackButtonClick()
     {
-        StartCoroutine(FadeCoroutine(1.0f, 0.0f, 0.65f, false));
-    }
-
-    private IEnumerator FadeCoroutine(float fadeStart, float fadeTarget, float timeSec, bool active)
-    {
-        float currentTime = Time.time;
-
-        _grp.alpha = fadeStart;
-
-        while (Time.time - currentTime <= timeSec)
-        {
-            float lerp = (Time.time - currentTime) / timeSec;
-
-            _grp.alpha = Mathf.Lerp(fadeStart, fadeTarget, lerp);
-            yield return null;
-        }
-        _grp.alpha = fadeTarget;
-        gameObject.SetActive(active);
-
-        yield return null;
+        StartCoroutine(Utility.FadeCoroutineUI(_grp,1.0f, 0.0f, 0.65f, false));
     }
 
     #endregion
