@@ -50,6 +50,7 @@ public class GameManager : Singleton<GameManager>
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
         CurrentRoom.Initialize();
         CurrentRoom.Enter();
+        AudioManager.Instance.PlayMusic(CurrentRoom.AmbientTheme, 0.5f);
         ItemInfoGroup.gameObject.SetActive(false);
         PauseMenuGroup.gameObject.SetActive(false);
 	}
@@ -64,6 +65,10 @@ public class GameManager : Singleton<GameManager>
     {
         _nextRoom = room;
         StartCoroutine(StartMoveCoroutine());
+        if (CurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != CurrentRoom)
+        {
+            AudioManager.Instance.PlayMusic(room.AmbientTheme, RoomTransitionTime);
+        }
     }
 
     public void ShowPauseMenu()
@@ -135,6 +140,11 @@ public class GameManager : Singleton<GameManager>
     {
         CurrentRoom.Leave();
 
+        if (CurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != CurrentRoom)
+        {
+            EquipmentManager.Instance.FlushOnNextRoom();
+        }
+
         CurrentRoom = _nextRoom;
         _nextRoom = CurrentRoom.PuzzleRoom;
 
@@ -143,11 +153,6 @@ public class GameManager : Singleton<GameManager>
 
         CameraManager.Instance.RecalculateToCurrentRoom();
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
-
-        if(CurrentRoom.ParentRoom == null)
-        {
-            EquipmentManager.Instance.FlushOnNextRoom();
-        }
 
         StartCoroutine(EndMoveCoroutine());
     }

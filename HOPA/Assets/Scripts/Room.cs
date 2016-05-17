@@ -19,6 +19,7 @@ public class Room : MonoBehaviour
     public string Name;
     public string Description;
     public Sprite MapSprite;
+    public AudioClip AmbientTheme;
     public Room PuzzleRoom = null;
     public Room ParentRoom = null;                // not necessary to be set if it is set when Room is assigned as child somewhere else
     public List<Room> ChildRooms;
