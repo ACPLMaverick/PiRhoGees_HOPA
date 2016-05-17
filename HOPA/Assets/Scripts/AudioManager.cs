@@ -56,7 +56,7 @@ public class AudioManager : Singleton<AudioManager>
 	
 	}
 
-    public void PlayClip(AudioClip clip, float delaySeconds)
+    public void PlayClip(AudioClip clip, float delaySeconds = 0.0f)
     {
         MainAudioSource.clip = clip;
         MainAudioSource.PlayDelayed(delaySeconds);
@@ -76,7 +76,7 @@ public class AudioManager : Singleton<AudioManager>
     /// </summary>
     /// <param name="music">Null can be passed, means silence</param>
     /// <param name="fadeSeconds">Fade in seconds between current and new track</param>
-    public void PlayMusic(AudioClip music, float fadeSeconds)
+    public void PlayMusic(AudioClip music, float fadeSeconds = 0.0f)
     {
         if(fadeSeconds == 0.0f)
         {

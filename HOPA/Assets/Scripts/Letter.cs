@@ -3,7 +3,8 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class Letter : PickableObject {
+public class Letter : PickableObject
+{
 
     #region constants
     public const string MaleHeader = "Szanowny Panie";
@@ -15,26 +16,35 @@ public class Letter : PickableObject {
     #endregion
 
     #region public
-    public Button LetterBackground;
-    public Text LetterHeaderText;
-    public Text LetterContextText;
-    public Text LetterSecondSideContextText;
+    public LetterUI LetterObj;
+    private string _headerText = "{0}";
+    private string _contextText = "Pragnę serdecznie powitać {0} na stanowisku młodszego asystena ds. organizacji wystaw. " +
+                                    "To wspaniałe, że wśród młodzieży wciąż znajdują się osoby chętne do pracy w instytucjach kulturowych, " +
+                                    "takich jak nasze zasłużone Muzeum Kinematografii. Jestem pewien, że czeka nas owocna współpraca i zarówno ja, jak i {1}, " +
+                                    "wyniesiemy z niej coś wartościowego.\n" +
+                                    "Na drugiej stronie zamieściłem pierwsze wytyczne.W razie pytań lub wątpliwości, chętnie służę wyjaśnieniem.\n" +
+                                    "Pozdrawiam i życzę powodzenia.\n\n" +
+                                    "Kustosz Muzeum Kinematografii w Łodzi\n" +
+                                    "Stefan Grajgór";
+    private string _secondSideContextText = "Proszę o przygotowanie do otwarcia wystawy, pod tytułem \"Od negatywu do kopii\"";
     #endregion
 
     #region private
-    private bool _isLetterTurned;
+
     #endregion
 
     #region functions
     // Use this for initialization
-    protected override void Start () {
+    protected override void Start()
+    {
         base.Start();
-	}
-	
-	// Update is called once per frame
-	protected override void Update () {
+    }
 
-	}
+    // Update is called once per frame
+    protected override void Update()
+    {
+
+    }
 
     protected override void PickUp(Vector2 position, Collider2D col)
     {
@@ -53,65 +63,44 @@ public class Letter : PickableObject {
             }
             tgt.z = transform.position.z;
 
-            //StartCoroutine(FlyToTarget(tgt, scl, FADE_OUT_TIME_SEC));
-
             InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);
+            StartCoroutine(Utility.FadeCoroutine(GetComponent<SpriteRenderer>(), 1.0f, 0.0f, 0.3f, false));
             _picked = true;
 
+            LetterObj.OnPageTurned.AddListener(PageTurned);
             ShowLetter(PlayerPrefs.GetString("Gender"));
             TutorialManager.Instance.GoStepFurther();
         }
     }
 
-    public void ShowLetter(string gender)
+    protected void ShowLetter(string gender)
     {
-        string tmp = "";
-
-        //TurnOffForm();
-        LetterBackground.gameObject.SetActive(true);
-
-        LetterHeaderText.gameObject.SetActive(true);
         switch (gender)
         {
             case "K":
-                tmp = string.Format(LetterHeaderText.text, FemaleHeader);
+                _headerText = string.Format(_headerText, FemaleHeader);
                 break;
             case "M":
-                tmp = string.Format(LetterHeaderText.text, MaleHeader);
+                _headerText = string.Format(_headerText, MaleHeader);
                 break;
         }
-        LetterHeaderText.text = tmp;
 
-        LetterContextText.gameObject.SetActive(true);
         switch (gender)
         {
             case "K":
-                tmp = string.Format(LetterContextText.text, FemaleAccusative, FemaleNominative);
+                _contextText = string.Format(_contextText, FemaleAccusative, FemaleNominative);
                 break;
             case "M":
-                tmp = string.Format(LetterContextText.text, MaleAccusative, MaleNominative);
+                _contextText = string.Format(_contextText, MaleAccusative, MaleNominative);
                 break;
         }
-        LetterContextText.text = tmp;
+
+        LetterObj.Show(_headerText, _contextText, _secondSideContextText, true);
     }
 
-    public void OnLetterBackgroundClick()
+    protected void PageTurned()
     {
-        if (!_isLetterTurned)
-        {
-            LetterHeaderText.gameObject.SetActive(false);
-            LetterContextText.gameObject.SetActive(false);
-            LetterBackground.transform.localScale = new Vector3(-1, 1, 1);
-            LetterSecondSideContextText.gameObject.SetActive(true);
-            _isLetterTurned = true;
-        }
-        else
-        {
-            LetterBackground.gameObject.SetActive(false);
-            LetterSecondSideContextText.gameObject.SetActive(false);
-            Destroy(gameObject);
-        }
-
+        LetterObj.OnPageTurned.RemoveListener(PageTurned);
         TutorialManager.Instance.GoStepFurther();
     }
     #endregion
