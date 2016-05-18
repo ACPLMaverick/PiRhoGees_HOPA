@@ -16,6 +16,7 @@ public class PickableObject : MonoBehaviour
     #region constants
 
     protected const float FADE_OUT_TIME_SEC = 1.0f;
+    protected const string DEFAULT_SOUND_ASSET_PATH = "Sounds/pick_item";
 
     #endregion
 
@@ -24,6 +25,7 @@ public class PickableObject : MonoBehaviour
     public uint ID = 0;
     public string Name;
     public string Description;
+    public AudioClip PickUpSound;
 
     #endregion
 
@@ -83,6 +85,11 @@ public class PickableObject : MonoBehaviour
     protected virtual void Start ()
     {
         InputManager.Instance.OnInputClickDown.AddListener(PickUp);
+
+        if(PickUpSound == null)
+        {
+            PickUpSound = AudioManager.Instance.DefaultSoundPickUp;
+        }
 	}
 	
 	// Update is called once per frame
@@ -120,6 +127,7 @@ public class PickableObject : MonoBehaviour
 
             StartCoroutine(FlyToTarget(tgt, scl, FADE_OUT_TIME_SEC));
 
+            AudioManager.Instance.PlayClip(PickUpSound);
 
             EquipmentManager.Instance.AddObjectToList(this, FADE_OUT_TIME_SEC);
             InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);

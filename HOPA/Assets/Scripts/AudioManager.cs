@@ -9,6 +9,8 @@ public class AudioManager : Singleton<AudioManager>
     public AudioSource MainAudioSource;
     public bool IsAudioMuted;
 
+    public AudioClip DefaultSoundPickUp;
+
     #endregion
 
     #region private

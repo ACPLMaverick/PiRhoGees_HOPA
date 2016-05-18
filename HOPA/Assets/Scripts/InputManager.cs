@@ -13,6 +13,7 @@ public class InputEventHold : UnityEvent<Vector2, Collider2D> { }
 public class InputEventZoom : UnityEvent<float> { }
 public class InputEventMove : UnityEvent<Vector2, Vector2, Collider2D> { }  //source, direction
 public class InputEventSwipe : UnityEvent<InputManager.SwipeDirection, float, Collider2D> { } // length
+public class InputEventShake : UnityEvent<Vector3> { }
 
 public class InputManager : Singleton<InputManager>
 {
@@ -37,6 +38,7 @@ public class InputManager : Singleton<InputManager>
     public InputEventMove OnInputMove = new InputEventMove();
     public InputEventMove OnInputMoveExclusive = new InputEventMove();
     public InputEventSwipe OnInputSwipe = new InputEventSwipe();
+    public InputEventShake OnInputShake = new InputEventShake();
 
     public bool InputAllEventsEnabled = true;       // does not take swipe into consideration because I'm lazy
     public bool InputClickUpEventsEnabled = true;
@@ -46,8 +48,12 @@ public class InputManager : Singleton<InputManager>
     public bool InputMoveEventsEnabled = true;
     public bool InputMoveEventsExclusiveEnabled = true;
     public bool InputSwipeEventsEnabled = true;
+    public bool InputShakeEventsEnabled = true;
 
-    public float SwipePercentageOfScreenDiag = 10.0f;
+    public float SwipePercentageOfScreenDiag = 50.0f;
+    public float ShakeVectorMinimumSqrLength = 10.0f;
+    public float ShakeVectorMinimumSqrLengthPC = 1000.0f;
+    public float ShakeTimeMinBetweenSeconds = 2.0f;
 
     #endregion
 
@@ -69,6 +75,9 @@ public class InputManager : Singleton<InputManager>
 
     private Collider2D _swipeHelperCol;
     private Vector2 _swipeHelperPos;
+
+    private Vector3 _shakeLast;
+    private float _shakeLastTimeSeconds = 0.0f;
 
     private float _diffPinchHelper;
     //private KeyValuePair<int, SortedList<int, Collider2D>>[] _sortLayerList;
@@ -115,7 +124,6 @@ public class InputManager : Singleton<InputManager>
                     if (InputClickUpEventsEnabled && InputAllEventsEnabled /*&& !_isMove*/)
                     {
                         Collider2D col = colUC;
-                        Debug.Log("UP " + col.name);
                         OnInputClickUp.Invoke(cTouch1.position, colUC);
 
                         if (_canInvokeMoveExclusive)
@@ -136,6 +144,7 @@ public class InputManager : Singleton<InputManager>
                     Vector2 diff = cTouch1.position - _swipeHelperPos;
                     if(colUC == _swipeHelperCol && diff.magnitude >= _swipeMinimumLength)
                     {
+                        Debug.Log("SWIPE OUT");
                         OnInputSwipe.Invoke(GetSwipeDirectionFromVector(diff), diff.magnitude, colUC);
                         _swipeHelperCol = null;
                         _swipeHelperPos = Vector2.zero;
@@ -145,13 +154,14 @@ public class InputManager : Singleton<InputManager>
                 // ClickDown
                 if (cTouch1.phase == TouchPhase.Began && InputClickDownEventsEnabled && InputAllEventsEnabled)
                 {
-                    Debug.Log("DOWN " + colUC.name);
+                    _cursorPrevPosition = cTouch1.position;
                     OnInputClickDown.Invoke(cTouch1.position, colUC);
                 }
 
                 // Swipe IN
                 if(cTouch1.phase == TouchPhase.Began && InputSwipeEventsEnabled)
                 {
+                    Debug.Log("SWIPE IN");
                     _swipeHelperCol = colUC;
                     _swipeHelperPos = cTouch1.position;
                 }
@@ -254,6 +264,21 @@ public class InputManager : Singleton<InputManager>
                 _cursorPrevPosition = cTouch1.position;
                 _cursor2PrevPosition = cTouch2.position;
             }
+
+
+            // shake
+            if(InputShakeEventsEnabled && InputAllEventsEnabled)
+            {
+                Vector3 shakeInput = Input.acceleration;
+
+                if(shakeInput.sqrMagnitude >= ShakeVectorMinimumSqrLength &&
+                    Time.time - _shakeLastTimeSeconds >= ShakeTimeMinBetweenSeconds)
+                {
+                    _shakeLastTimeSeconds = Time.time;
+                    Debug.Log("SHAKEKURWA " + shakeInput.sqrMagnitude.ToString());
+                    OnInputShake.Invoke(shakeInput);
+                }
+            }
         }
             
         // code for editor or PC test input
@@ -332,6 +357,24 @@ public class InputManager : Singleton<InputManager>
             }
 
             _cursorPrevPosition = Input.mousePosition;
+        }
+
+        // shake simulation
+        if (InputShakeEventsEnabled && InputAllEventsEnabled)
+        {
+                Vector3 mPositionNoZ = Input.mousePosition;
+                mPositionNoZ.z = 0.0f;
+                Vector3 cShakeDiff = mPositionNoZ - _shakeLast;
+                _shakeLast = mPositionNoZ;
+
+                if (cShakeDiff.sqrMagnitude >= ShakeVectorMinimumSqrLengthPC &&
+                    Input.GetMouseButton(2) &&
+                    Time.time - _shakeLastTimeSeconds >= ShakeTimeMinBetweenSeconds)
+                {
+                    _shakeLastTimeSeconds = Time.time;
+                    Debug.Log(cShakeDiff.sqrMagnitude);
+                    OnInputShake.Invoke(cShakeDiff);
+                }
         }
 
         // showing pause menu on back button pressed

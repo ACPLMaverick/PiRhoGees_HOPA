@@ -139,14 +139,14 @@ public class GameManager : Singleton<GameManager>
     private void MoveToCurrentRoom()
     {
         CurrentRoom.Leave();
+        Room tmpCurrentRoom = CurrentRoom;
+        CurrentRoom = _nextRoom;
+        _nextRoom = CurrentRoom.PuzzleRoom;
 
-        if (CurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != CurrentRoom)
+        if (tmpCurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != tmpCurrentRoom)
         {
             EquipmentManager.Instance.FlushOnNextRoom();
         }
-
-        CurrentRoom = _nextRoom;
-        _nextRoom = CurrentRoom.PuzzleRoom;
 
         CurrentRoom.Initialize();   // nothing will happen if already initialized
         CurrentRoom.Enter();

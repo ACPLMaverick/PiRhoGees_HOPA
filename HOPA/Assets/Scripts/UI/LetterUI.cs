@@ -84,7 +84,7 @@ public class LetterUI : MonoBehaviour
         InputManager.Instance.OnInputMove.AddListener(Slide);
         InputManager.Instance.OnInputSwipe.AddListener(TurnPage);
 
-        _upPosition = GetComponent<RectTransform>().anchoredPosition;
+        _upPosition = rt.anchoredPosition;
         GetDownPosition(_contextText.GetComponent<RectTransform>());
 
         gameObject.SetActive(false);
@@ -151,7 +151,8 @@ public class LetterUI : MonoBehaviour
         {
             float t = 0.3f;
 
-            if (_turned && dir == InputManager.SwipeDirection.RIGHT)
+            if ((_turned && dir == InputManager.SwipeDirection.RIGHT) || 
+                (!_turned && dir == InputManager.SwipeDirection.RIGHT && !_isCurrentlyTwoSided))
             {
                 Hide();
             }

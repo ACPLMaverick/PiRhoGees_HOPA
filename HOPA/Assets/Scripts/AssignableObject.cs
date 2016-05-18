@@ -8,7 +8,7 @@ public class AssignableObject : MonoBehaviour
 {
     #region events
 
-    public AssignableObjectUnityEvent AssignedEvent;
+    public AssignableObjectUnityEvent AssignedEvent = new AssignableObjectUnityEvent();
     public Color AssignedColor;
 
     #endregion
@@ -47,8 +47,6 @@ public class AssignableObject : MonoBehaviour
     {
         // setting transform min and max fixed on to room corners, as they aren't taken into consideration
         // mode is also arbitrarily set to box
-
-        AssignedEvent = new AssignableObjectUnityEvent();
         CurrentAssignee = null;
 
         Room parentRoom = GetComponentInParent<Room>();
