@@ -12,7 +12,7 @@ public class InputEventClickDown : UnityEvent<Vector2, Collider2D> { }
 public class InputEventHold : UnityEvent<Vector2, Collider2D> { }
 public class InputEventZoom : UnityEvent<float> { }
 public class InputEventMove : UnityEvent<Vector2, Vector2, Collider2D> { }  //source, direction
-public class InputEventSwipe : UnityEvent<InputManager.SwipeDirection, float, Collider2D> { } // length
+public class InputEventSwipe : UnityEvent<Vector2, InputManager.SwipeDirection, float, Collider2D> { } // length
 public class InputEventShake : UnityEvent<Vector3> { }
 
 public class InputManager : Singleton<InputManager>
@@ -123,7 +123,6 @@ public class InputManager : Singleton<InputManager>
                 {
                     if (InputClickUpEventsEnabled && InputAllEventsEnabled /*&& !_isMove*/)
                     {
-                        Collider2D col = colUC;
                         OnInputClickUp.Invoke(cTouch1.position, colUC);
 
                         if (_canInvokeMoveExclusive)
@@ -145,7 +144,7 @@ public class InputManager : Singleton<InputManager>
                     if(colUC == _swipeHelperCol && diff.magnitude >= _swipeMinimumLength)
                     {
                         Debug.Log("SWIPE OUT");
-                        OnInputSwipe.Invoke(GetSwipeDirectionFromVector(diff), diff.magnitude, colUC);
+                        OnInputSwipe.Invoke(_swipeHelperPos, GetSwipeDirectionFromVector(diff), diff.magnitude, colUC);
                         _swipeHelperCol = null;
                         _swipeHelperPos = Vector2.zero;
                     }
@@ -297,9 +296,9 @@ public class InputManager : Singleton<InputManager>
             if (Input.GetMouseButtonUp(0) && InputSwipeEventsEnabled)
             {
                 Vector2 diff = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - _swipeHelperPos;
-                if (colUC == _swipeHelperCol && diff.magnitude >= _swipeMinimumLength)
+                if (/*colUC == _swipeHelperCol &&*/ diff.magnitude >= _swipeMinimumLength)
                 {
-                    OnInputSwipe.Invoke(GetSwipeDirectionFromVector(diff), diff.magnitude, colUC);
+                    OnInputSwipe.Invoke(_swipeHelperPos, GetSwipeDirectionFromVector(diff), diff.magnitude, colUC);
                     _swipeHelperCol = null;
                     _swipeHelperPos = Vector2.zero;
                 }
@@ -473,7 +472,7 @@ public class InputManager : Singleton<InputManager>
         SwipeDirection dir = 0;
 
         diff.Normalize();
-        diff = -diff;
+        diff.x = -diff.x;
         Vector2[] unitVectors = new Vector2[] { Vector2.up, Vector2.right, Vector2.down, Vector2.left };
         int selectedID = 0;
 

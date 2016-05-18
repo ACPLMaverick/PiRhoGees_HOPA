@@ -120,7 +120,7 @@ public class Map : PickableUsableObject
         base.Update();
 	}
 
-    protected void MoveInDirection(InputManager.SwipeDirection dirEnum, float length, Collider2D col)
+    protected void MoveInDirection(Vector2 origin, InputManager.SwipeDirection dirEnum, float length, Collider2D col)
     {
         if(!_isEnabled || dirEnum == InputManager.SwipeDirection.UP || dirEnum == InputManager.SwipeDirection.DOWN)
         {

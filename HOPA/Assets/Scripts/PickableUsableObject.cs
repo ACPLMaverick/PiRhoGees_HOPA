@@ -68,7 +68,8 @@ public class PickableUsableObject : PickableObject
         {
             Vector3 tgt = Vector3.zero, scl = Vector3.zero;
 
-            if (EquipmentManager.Instance.CurrentMode == EquipmentManager.EquipmentMode.USABLES)
+            if (EquipmentManager.Instance.CurrentMode == EquipmentManager.EquipmentMode.USABLES && 
+                !EquipmentManager.Instance.PanelPickableList.GetComponent<PanelGeneric>().Hidden)
             {
                 tgt = Camera.main.ScreenToWorldPoint(EquipmentManager.Instance.PanelPickableList.transform.position);
             }

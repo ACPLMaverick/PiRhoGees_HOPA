@@ -108,6 +108,12 @@ public class CameraManager : Singleton<CameraManager>
     private bool SortingLayerAllowed(Collider2D collider)
     {
         SpriteRenderer sr = collider.GetComponent<SpriteRenderer>();
+        
+        if(sr == null)
+        {
+            return true;
+        }
+
         string lName = sr.sortingLayerName;
 
         foreach(string name in _allowedSortingLayerNames)

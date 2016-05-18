@@ -76,17 +76,20 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 {
                     PanelPickableList.gameObject.SetActive(true);
                     PanelUsableList.gameObject.SetActive(false);
+                    _currentPanel = PanelPickableList;
                 }
                 else
                 {
                     PanelPickableList.gameObject.SetActive(false);
                     PanelUsableList.gameObject.SetActive(true);
+                    _currentPanel = PanelUsableList;
                 }
             }
             else
             {
                 PanelPickableList.gameObject.SetActive(false);
                 PanelUsableList.gameObject.SetActive(false);
+                _currentPanel = null;
             }
         }
     }
@@ -96,6 +99,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     #region private
 
     private EquipmentMode _currentMode;
+    private RectTransform _currentPanel;
     private bool _enabled = true;
 
     private List<PickableObject> _pickableList;
@@ -118,7 +122,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
         _allPickablesDict = new Dictionary<PickableObject, Text>();
         _pickableList = new List<PickableObject>();
         _usableList = new List<PickableUsableObject>();
-        _currentMode = EquipmentMode.PICKABLES;
         PanelPickableList.gameObject.SetActive(true);
         PanelUsableList.gameObject.SetActive(false);
         ButtonEquipmentPickableToggle.GetComponent<ButtonEquipmentPanelToggle>().SwitchMode(CurrentMode);
@@ -126,7 +129,9 @@ public class EquipmentManager : Singleton<EquipmentManager>
         StartGUIPickables();
         StartGUIUsables();
 
-        SwitchPanel();
+        CurrentMode = EquipmentMode.USABLES;
+        PanelUsableList.GetComponent<PanelGeneric>().Hide(true);
+        PanelPickableList.GetComponent<PanelGeneric>().Hide(true);
     }
 	
 	// Update is called once per frame
@@ -153,6 +158,10 @@ public class EquipmentManager : Singleton<EquipmentManager>
         }
 
         StartCoroutine(AddObjectToPoolCoroutine(obj, lagSeconds));
+        if(CurrentMode == EquipmentMode.USABLES)
+        {
+            _currentPanel.GetComponent<PanelGeneric>().Show(false);
+        }
 
         obj.gameObject.layer = LayerMask.NameToLayer("UI");
     }
@@ -249,7 +258,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
         Vector2 firstPos = PanelUsableList.position;
         firstPos.y = PanelUsableList.position.y + PanelUsableList.rect.height * 0.39f * PanelUsableList.GetComponent<Image>().canvas.scaleFactor;
         GameObject container = (GameObject)Instantiate(UsableListElementPrefab, firstPos, Quaternion.identity);
-        float xDelta = (PanelUsableList.rect.height - (container.GetComponent<Image>()).rectTransform.rect.height) * 0.5f;
+        float xDelta = ((container.GetComponent<Image>()).rectTransform.rect.width) * 0.25f;
         float panelWidth = container.GetComponent<RectTransform>().rect.width;
         float objTotalDelta = panelWidth + xDelta;
         float containerWidth = container.GetComponent<Image>().rectTransform.rect.width;
@@ -278,8 +287,8 @@ public class EquipmentManager : Singleton<EquipmentManager>
         List<PickableObject> pickablesOnLevel = GameManager.Instance.CurrentRoom.PickableObjects;
 
         Vector2 firstPos = PanelPickableList.position;
-        firstPos.x -= PanelPickableList.rect.width * 0.4f * PanelPickableList.GetComponent<Image>().canvas.scaleFactor;
-        firstPos.y += PanelPickableList.rect.height * 0.65f * PanelPickableList.GetComponent<Image>().canvas.scaleFactor;
+        firstPos.x -= PanelPickableList.rect.width * 0.36f * PanelPickableList.GetComponent<Image>().canvas.scaleFactor;
+        firstPos.y += PanelPickableList.rect.height * 0.67f * PanelPickableList.GetComponent<Image>().canvas.scaleFactor;
         int i = 0;
         Vector2 nextPos = firstPos;
         foreach(PickableObject obj in pickablesOnLevel)
@@ -293,7 +302,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
             obj.AssociatedListElement = newobj.GetComponent<Button>();
 
             RectTransform rt = newobj.GetComponent<RectTransform>();
-            if (i % 4 == 0 && i != 0)
+            if (i % 3 == 0 && i != 0)
             {
                 nextPos.y -= rt.rect.height;
                 nextPos.x = firstPos.x;
@@ -322,11 +331,13 @@ public class EquipmentManager : Singleton<EquipmentManager>
             {
                 PanelPickableList.gameObject.SetActive(true);
                 PanelUsableList.gameObject.SetActive(false);
+                _currentPanel = PanelPickableList;
             }
             else if (CurrentMode == EquipmentMode.USABLES)
             {
                 PanelPickableList.gameObject.SetActive(false);
                 PanelUsableList.gameObject.SetActive(true);
+                _currentPanel = PanelUsableList;
             }
             ButtonEquipmentPickableToggle.GetComponent<ButtonEquipmentPanelToggle>().SwitchMode(CurrentMode);
         }

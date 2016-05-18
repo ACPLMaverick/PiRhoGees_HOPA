@@ -145,7 +145,7 @@ public class LetterUI : MonoBehaviour
         }
     }
 
-    private void TurnPage(InputManager.SwipeDirection dir, float length, Collider2D col)
+    private void TurnPage(Vector2 origin, InputManager.SwipeDirection dir, float length, Collider2D col)
     {
         if (gameObject.activeSelf)
         {

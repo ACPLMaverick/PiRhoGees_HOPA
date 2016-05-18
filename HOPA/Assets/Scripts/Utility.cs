@@ -40,4 +40,77 @@ public static class Utility
 
         yield return null;
     }
+
+    public static IEnumerator TransformCoroutine(Transform t, Vector3 startPos, Quaternion startRot, Vector3 startScale,
+                                                    Vector3 targetPos, Quaternion targetRot, Vector3 targetScale, float timeSec, bool active)
+    {
+        float currentTime = Time.time;
+
+        t.localPosition = startPos;
+        t.localRotation = startRot;
+        t.localScale = startScale;
+
+        while (Time.time - currentTime <= timeSec)
+        {
+            float lerp = (Time.time - currentTime) / timeSec;
+
+            t.localPosition = Vector3.Lerp(startPos, targetPos, lerp);
+            t.localRotation = Quaternion.Slerp(startRot, targetRot, lerp);
+            t.localScale = Vector3.Lerp(startScale, targetScale, lerp);
+            yield return null;
+        }
+
+        t.localPosition = targetPos;
+        t.localRotation = targetRot;
+        t.localScale = targetScale;
+
+        t.gameObject.SetActive(active);
+
+        yield return null;
+    }
+
+    public static IEnumerator TransformCoroutineUI(RectTransform rt, Vector3 startPos, Quaternion startRot, Vector3 startScale,
+                                                    Vector3 targetPos, Quaternion targetRot, Vector3 targetScale, float timeSec, bool active)
+    {
+        float currentTime = Time.time;
+
+        rt.anchoredPosition = startPos;
+        rt.localRotation = startRot;
+        rt.localScale = startScale;
+
+        while (Time.time - currentTime <= timeSec)
+        {
+            float lerp = (Time.time - currentTime) / timeSec;
+
+            rt.anchoredPosition = Vector3.Lerp(startPos, targetPos, lerp);
+            rt.localRotation = Quaternion.Slerp(startRot, targetRot, lerp);
+            rt.localScale = Vector3.Lerp(startScale, targetScale, lerp);
+            yield return null;
+        }
+
+        rt.anchoredPosition = targetPos;
+        rt.localRotation = targetRot;
+        rt.localScale = targetScale;
+
+        rt.gameObject.SetActive(active);
+
+        yield return null;
+    }
+
+    public static bool IsCursorInUIBounds(RectTransform rt, Vector2 cursorPos)
+    {
+        if(
+            cursorPos.x > rt.rect.xMin &&
+            cursorPos.x < rt.rect.xMax &&
+            cursorPos.y > rt.rect.yMin &&
+            cursorPos.y < rt.rect.yMax
+            )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }
