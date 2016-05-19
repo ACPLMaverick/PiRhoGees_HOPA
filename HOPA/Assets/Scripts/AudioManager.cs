@@ -78,12 +78,14 @@ public class AudioManager : Singleton<AudioManager>
     /// </summary>
     /// <param name="music">Null can be passed, means silence</param>
     /// <param name="fadeSeconds">Fade in seconds between current and new track</param>
-    public void PlayMusic(AudioClip music, float fadeSeconds = 0.0f)
+    public void PlayMusic(AudioClip music, float fadeSeconds = 0.0f, bool looping = true)
     {
+        Debug.Log("PlayMusic");
         if(fadeSeconds == 0.0f)
         {
             _musicAudioSourceSecond.clip = music;
             _musicAudioSourceSecond.volume = 1.0f;
+            _musicAudioSourceSecond.loop = looping;
             _musicAudioSourceSecond.Play();
             _musicAudioSourceFirst.volume = 0.0f;
             _musicAudioSourceFirst.Stop();

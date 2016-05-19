@@ -141,10 +141,11 @@ public class InputManager : Singleton<InputManager>
                 if (cTouch1.phase == TouchPhase.Ended && InputSwipeEventsEnabled)
                 {
                     Vector2 diff = cTouch1.position - _swipeHelperPos;
-                    if(colUC == _swipeHelperCol && diff.magnitude >= _swipeMinimumLength)
+                    if (/*colUC == _swipeHelperCol &&*/ diff.magnitude >= _swipeMinimumLength)
                     {
-                        Debug.Log("SWIPE OUT");
-                        OnInputSwipe.Invoke(_swipeHelperPos, GetSwipeDirectionFromVector(diff), diff.magnitude, colUC);
+                        SwipeDirection dir = GetSwipeDirectionFromVector(diff);
+                        Debug.Log("SWIPE OUT " + dir.ToString());
+                        OnInputSwipe.Invoke(_swipeHelperPos, dir, diff.magnitude, colUC);
                         _swipeHelperCol = null;
                         _swipeHelperPos = Vector2.zero;
                     }

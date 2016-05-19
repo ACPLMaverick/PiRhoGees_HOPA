@@ -79,7 +79,7 @@ public class UIEvents : MonoBehaviour {
     public void OnTutorialClick(int value)
     {
         PlayerPrefs.SetInt("Tutorial", value);
-        SceneManager.LoadScene(1);
+        SceneChangeManager.Instance.ChangeScene(1);
     }
 
     #endregion

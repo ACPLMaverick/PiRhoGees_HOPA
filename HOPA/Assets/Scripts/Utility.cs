@@ -99,18 +99,26 @@ public static class Utility
 
     public static bool IsCursorInUIBounds(RectTransform rt, Vector2 cursorPos)
     {
-        if(
-            cursorPos.x > rt.rect.xMin &&
-            cursorPos.x < rt.rect.xMax &&
-            cursorPos.y > rt.rect.yMin &&
-            cursorPos.y < rt.rect.yMax
-            )
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, cursorPos);
+
+        //Vector2 rMin = new Vector2(rt.rect.xMin, rt.rect.yMin);
+        //Vector2 rMax = new Vector2(rt.rect.xMax, rt.rect.yMax);
+
+        //rMin = RectTransformUtility.WorldToScreenPoint(Camera.main, rMin);
+        //rMax = RectTransformUtility.WorldToScreenPoint(Camera.main, rMax);
+
+        //if(
+        //    cursorPos.x > rt.rect.xMin &&
+        //    cursorPos.x < rt.rect.xMax &&
+        //    cursorPos.y > rt.rect.yMin &&
+        //    cursorPos.y < rt.rect.yMax
+        //    )
+        //{
+        //    return true;
+        //}
+        //else
+        //{
+        //    return false;
+        //}
     }
 }

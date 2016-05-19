@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -95,9 +94,7 @@ public class GameManager : Singleton<GameManager>
         }
         FadeImage.canvasRenderer.SetAlpha(1.0f);
 
-        int cScene = SceneManager.GetActiveScene().buildIndex;
-        SceneManager.LoadScene(0);
-        SceneManager.UnloadScene(cScene);
+        SceneChangeManager.Instance.ChangeScene(0);
     }
 
     private IEnumerator StartMoveCoroutine()

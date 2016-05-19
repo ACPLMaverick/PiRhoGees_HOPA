@@ -105,7 +105,7 @@ public class FormUIManager : MonoBehaviour {
         //LocationBackground.sprite = LocationBackgroundReplacement;
         //LetterButton.interactable = true;
         //TurnOffForm();
-        SceneManager.LoadScene(2);
+        SceneChangeManager.Instance.ChangeScene(2);
     }
 
     #endregion
