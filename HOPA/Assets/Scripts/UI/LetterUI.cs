@@ -113,6 +113,14 @@ public class LetterUI : MonoBehaviour
             _secondSideContextText.text = secondSideContext;
             _isCurrentlyTwoSided = twoSided;
 
+            _headerText.gameObject.GetComponent<CanvasGroup>().alpha = 1;
+            _headerText.gameObject.SetActive(true);
+            _contextText.gameObject.GetComponent<CanvasGroup>().alpha = 1;
+            _contextText.gameObject.SetActive(true);
+
+            GetDownPosition(_contextText.GetComponent<RectTransform>());
+            _turned = false;
+
             OnLetterOpened.Invoke();
             StartCoroutine(Utility.FadeCoroutineUI(_background.GetComponent<CanvasGroup>(), 0.0f, 1.0f, 0.5f, true));
         }

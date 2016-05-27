@@ -17,6 +17,7 @@ public class Letter : PickableObject
 
     #region public
     public LetterUI LetterObj;
+    public int LetterID;
     private string _headerText = "{0}";
     private string _contextText = "Pragnę serdecznie powitać {0} na stanowisku młodszego asystena ds. organizacji wystaw. " +
                                     "To wspaniałe, że wśród młodzieży wciąż znajdują się osoby chętne do pracy w instytucjach kulturowych, " +
@@ -27,6 +28,21 @@ public class Letter : PickableObject
                                     "Kustosz Muzeum Kinematografii w Łodzi\n" +
                                     "Stefan Grajgór";
     private string _secondSideContextText = "Proszę o przygotowanie do otwarcia wystawy, pod tytułem \"Od negatywu do kopii\"";
+    private string _contextText_puzzle1 = "Zadanie zostało wykonane bezbłędnie, jednak to nie koniec pracy na dzisiaj. W swoim osobliwym dla niektórych zwyczaju," +
+                                    "oprócz zaradności testuję także wiedzę moich pracowników. Przygotowałem dla {0} jedną z kilku zagadek jakie mam w zanadrzu." +
+                                    "Ot wystarczy dopasować tytuł filmu do odpowiadającego mu plakatu. \n" +
+                                    "Życzę powodzenia.\n\n" +
+                                    "Stefan Grajgór";
+    private string _contextText2 = "Przepraszam, że nie zostawiłem żadnej notatki w poprzednim pomieszczeniu, ale jeśli {0} to czyta," +
+                                    " to znaczy że widać u {1} chęć do pracy. Prosiłbym o przygotowanie także i tej wystawy," +
+                                    " gdyż przewidujemy kilka dużych wycieczek w przeciągu najbliższych dwóch tygodni. " +
+                                    "Mam nadzieję, że tak jak poprzednia, nie sprawi najmniejszego kłopotu.\n" +
+                                    "Życzę powodzenia.\n\n";
+    private string _contextText_puzzle2 = "Jestem bardzo zadowolony z {0} dotychczasowej pracy. Przyszła zatem kolej na kolejny sprawdzian teoretyczny." +
+                                    "Przygotowałem kilka zdjęć prezentujących konkretne rodzaje kadrów. Zadanie jest proste -" +
+                                    " spośród dostępnych opcji wybrać tę, która pasuje do przedstawionego na zdjęciu kadru.\n" +
+                                    "Życzę powodzenia.\n\n" +
+                                    "Stefan Grajgór";
     #endregion
 
     #region private
@@ -88,20 +104,68 @@ public class Letter : PickableObject
         switch (gender)
         {
             case "K":
-                _contextText = string.Format(_contextText, FemaleAccusative, FemaleNominative);
+                //_contextText = string.Format(_contextText, FemaleAccusative, FemaleNominative);
+                SetFemaleContext();
                 break;
             case "M":
-                _contextText = string.Format(_contextText, MaleAccusative, MaleNominative);
+                //_contextText = string.Format(_contextText, MaleAccusative, MaleNominative);
+                SetMaleContext();
                 break;
         }
 
-        LetterObj.Show(_headerText, _contextText, _secondSideContextText, true);
+        //LetterObj.Show(_headerText, _contextText, _secondSideContextText, true);
     }
 
     protected void PageTurned()
     {
         LetterObj.OnPageTurned.RemoveListener(PageTurned);
         TutorialManager.Instance.GoStepFurther();
+    }
+
+    protected void SetFemaleContext()
+    {
+        switch (LetterID)
+        {
+            case 0: //PLANSZA 1
+                _contextText = string.Format(_contextText, FemaleAccusative, FemaleNominative);
+                LetterObj.Show(_headerText, _contextText, _secondSideContextText, true);
+                break;
+            case 1: //ZAGADKA 1
+                _contextText = string.Format(_contextText_puzzle1, FemaleNominative);
+                LetterObj.Show(_headerText, _contextText, "", false);
+                break;
+            case 2: //PLANSZA 2
+                _contextText = string.Format(_contextText2, FemaleNominative, FemaleNominative);
+                LetterObj.Show(_headerText, _contextText, "", false);
+                break;
+            case 3: //ZAGADKA 2
+                _contextText = string.Format(_contextText_puzzle2, FemaleNominative);
+                LetterObj.Show(_headerText, _contextText, "", false);
+                break;
+        }
+    }
+
+    protected void SetMaleContext()
+    {
+        switch (LetterID)
+        {
+            case 0: //PLANSZA 1
+                _contextText = string.Format(_contextText, MaleAccusative, MaleNominative);
+                LetterObj.Show(_headerText, _contextText, _secondSideContextText, true);
+                break;
+            case 1: //ZAGADKA 1
+                _contextText = string.Format(_contextText_puzzle1, MaleAccusative);
+                LetterObj.Show(_headerText, _contextText, "", false);
+                break;
+            case 2: //PLANSZA 2
+                _contextText = string.Format(_contextText2, MaleNominative, MaleAccusative);
+                LetterObj.Show(_headerText, _contextText, "", false);
+                break;
+            case 3: //ZAGADKA 2
+                _contextText = string.Format(_contextText_puzzle2, MaleAccusative);
+                LetterObj.Show(_headerText, _contextText, "", false);
+                break;
+        }
     }
     #endregion
 }
