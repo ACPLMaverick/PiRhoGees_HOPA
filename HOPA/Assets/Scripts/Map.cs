@@ -142,6 +142,8 @@ public class Map : PickableUsableObject
                 break;
         }
 
+        TutorialManager.Instance.GoStepFurther(6);
+
         if (nextPosition >= 0 && nextPosition < _totalMapLength)
         {
             SetEdgeFadeOnPosition(nextPosition);
