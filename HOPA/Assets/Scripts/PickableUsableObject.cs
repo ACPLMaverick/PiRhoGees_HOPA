@@ -106,8 +106,13 @@ public class PickableUsableObject : PickableObject
             StartCoroutine(OnClickUpReturnToSlotCoroutine(_container.UsableField.GetComponent<RectTransform>().position, _startSlotPosition, 0.5f));
 
             // check for mouse collisions with scene objects
-            Collider2D col = InputManager.Instance.GetCollider2DUnderCursor();
+            RaycastHit2D[] hits = InputManager.Instance.GetRaycastHitsUnderCursor();
             int objectsLayerID = LayerMask.NameToLayer("Objects");
+            if(hits.Length == 0)
+            {
+                return;
+            }
+            Collider2D col = hits[0].collider;
             if (col != null && col.gameObject.layer == objectsLayerID)
             {
                 PerformActionOnClick(col.gameObject);
@@ -177,7 +182,10 @@ public class PickableUsableObject : PickableObject
 
     protected virtual void PerformActionOnClick(GameObject other)
     {
-        Debug.Log("Not implemented.");
+        if(other != null)
+        {
+            Debug.Log(other.name);
+        }
     }
 
     #endregion
