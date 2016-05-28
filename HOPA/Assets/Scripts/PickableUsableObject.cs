@@ -18,6 +18,7 @@ public class PickableUsableObject : PickableObject
 
     public List<PickableUsableObject> InteractableObjects;  // sth else will be here
     public Dictionary<PickableUsableObject, List<PickableUsableObject>> MergableObjects;
+    public GameObject TargetObject; //To decide with which object, PUObject will interract
 
     #endregion
 
@@ -182,9 +183,10 @@ public class PickableUsableObject : PickableObject
 
     protected virtual void PerformActionOnClick(GameObject other)
     {
-        if(other != null)
+        if(other != null && other.Equals(TargetObject))
         {
-            Debug.Log(other.name);
+            //Debug.Log(other.name);
+            other.GetComponent<Animator>().enabled = true;
         }
     }
 
