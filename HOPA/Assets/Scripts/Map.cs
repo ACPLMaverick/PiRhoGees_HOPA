@@ -195,6 +195,9 @@ public class Map : PickableUsableObject
 
     public void ShowMap()
     {
+        //To enable toggle button (On room 0 it's useless and provokes bugs)
+        EquipmentManager.Instance.ButtonEquipmentPickableToggle.interactable = true;
+
         if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
             EquipmentManager.Instance.DisplayBackButton(false, EquipmentManager.Instance.ButtonBack.interactable);
