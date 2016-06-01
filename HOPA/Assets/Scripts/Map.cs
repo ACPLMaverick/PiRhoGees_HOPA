@@ -7,6 +7,12 @@ using System;
 
 public class Map : PickableUsableObject
 {
+    #region const
+
+    private const float MAP_PART_PIECE_OVERLAY_MPLIER = 0.8f;
+
+    #endregion
+
     #region public
 
     public CanvasGroup MapObject;
@@ -27,6 +33,9 @@ public class Map : PickableUsableObject
     private MapEdgeFade _fadeRight;
     //private Button _exitButton;
     private Vector2 _movementOneClick;
+    private Vector2 _movementOneClickFromStart;
+    private Vector2 _visiblePos;
+    private Vector2 _invisiblePos;
     private bool _isEnabled = false;
     private int _currentMapPosition = 0;
     private int _totalMapLength;
@@ -63,9 +72,13 @@ public class Map : PickableUsableObject
         _fadeLeft = fades[0];
         _fadeRight = fades[1];
 
+        _visiblePos = MapObject.GetComponent<RectTransform>().localPosition;
+        _invisiblePos = new Vector2(_visiblePos.x + MapObject.GetComponent<RectTransform>().rect.width, _visiblePos.y);
+
         // calculate movementOneClick and scale factor
         RectTransform r = _mapTitle.GetComponent<RectTransform>();
-        _movementOneClick = new Vector2(r.rect.width, 0.0f);
+        _movementOneClick = new Vector2(r.rect.width/* * MAP_PART_PIECE_OVERLAY_MPLIER*/, 0.0f);
+        _movementOneClickFromStart = new Vector2(r.rect.width * MAP_PART_PIECE_OVERLAY_MPLIER, 0.0f);
 
         // instantiate map parts according to part list
         Vector2 d = _movementOneClick;
@@ -76,9 +89,10 @@ public class Map : PickableUsableObject
             container.transform.SetParent(_mapButtonsGroup.transform, false);
 
             RectTransform tr = container.GetComponent<RectTransform>();
-            tr.localScale = Vector3.one;
             tr.sizeDelta = r.sizeDelta;
+            //tr.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, MAP_PART_PIECE_OVERLAY_MPLIER);
             tr.localPosition += new Vector3(d.x, d.y, 0.0f);
+            tr.localScale = Vector3.one;
 
             MapPart mp = container.GetComponent<MapPart>();
             mp.AssociatedRoom = room;
@@ -93,6 +107,12 @@ public class Map : PickableUsableObject
             }
 
             _mapParts.Add(mp);
+
+            if(mp.AssociatedRoom.Locked)
+            {
+                mp.GetComponentInChildren<FlashingButton>().enabled = false;
+            }
+
             d.x += _movementOneClick.x;
         }
 
@@ -148,11 +168,19 @@ public class Map : PickableUsableObject
         {
             SetEdgeFadeOnPosition(nextPosition);
 
+            Vector2 oneClick = _movementOneClick;
+
+            if ((_currentMapPosition == 0 && dirEnum == InputManager.SwipeDirection.RIGHT) || 
+                (_currentMapPosition == 1 && dirEnum == InputManager.SwipeDirection.LEFT))
+            {
+                oneClick = _movementOneClickFromStart;
+            }
+
             _currentMapPosition = nextPosition;
 
             Vector2 finalMovement;
-            finalMovement.x = direction.x * -_movementOneClick.x * _mapTitle.canvas.scaleFactor;
-            finalMovement.y = direction.y * -_movementOneClick.y;
+            finalMovement.x = direction.x * -oneClick.x * _mapTitle.canvas.scaleFactor;
+            finalMovement.y = direction.y * -oneClick.y;
 
             RectTransform r = _mapButtonsGroup.GetComponent<RectTransform>();
             finalMovement = new Vector2(r.position.x, r.position.y) + finalMovement;
@@ -264,6 +292,34 @@ public class Map : PickableUsableObject
         _isEnabled = isUsableOnFinal;
 
         if(!_isEnabled)
+        {
+            InputManager.Instance.InputAllEventsEnabled = true;
+        }
+
+        yield return null;
+    }
+
+    protected IEnumerator MapVisibilityCoroutine(float timeSeconds, Vector2 startPos, Vector2 targetPos, bool influenceActivity, bool isUsableOnFinal)
+    {
+        float cTime = Time.time;
+        MapObject.GetComponent<RectTransform>().localPosition = startPos;
+
+        while (Time.time - cTime <= timeSeconds)
+        {
+            float lerpValue = (Time.time - cTime) / timeSeconds;
+            Vector2 pos = Vector2.Lerp(startPos, targetPos, lerpValue);
+            MapObject.GetComponent<RectTransform>().localPosition = pos;
+            yield return null;
+        }
+        MapObject.GetComponent<RectTransform>().localPosition = targetPos;
+
+        if (influenceActivity)
+        {
+            MapObject.gameObject.SetActive(isUsableOnFinal);
+        }
+        _isEnabled = isUsableOnFinal;
+
+        if (!_isEnabled)
         {
             InputManager.Instance.InputAllEventsEnabled = true;
         }
