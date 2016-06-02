@@ -103,7 +103,14 @@ public class PickableObject : MonoBehaviour
 
     protected virtual void OnListElementClick()
     {
-        GameManager.Instance.ItemInfoGroup.Show(GetComponent<SpriteRenderer>().sprite, Name, Description);
+        if (Description.Length != 0)
+        {
+            GameManager.Instance.ItemInfoGroup.Show(GetComponent<SpriteRenderer>().sprite, Name, Description);
+        }
+        else
+        {
+            GameManager.Instance.ItemInfoGroup.Show(GetComponent<SpriteRenderer>().sprite, Name);
+        }
 
         TutorialManager.Instance.GoStepFurther();
     }

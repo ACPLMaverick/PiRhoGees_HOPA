@@ -372,7 +372,6 @@ public class InputManager : Singleton<InputManager>
                     Time.time - _shakeLastTimeSeconds >= ShakeTimeMinBetweenSeconds)
                 {
                     _shakeLastTimeSeconds = Time.time;
-                    Debug.Log(cShakeDiff.sqrMagnitude);
                     OnInputShake.Invoke(cShakeDiff);
                 }
         }

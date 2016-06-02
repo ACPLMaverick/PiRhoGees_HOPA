@@ -327,6 +327,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     {
         if(Enabled)
         {
+            RectTransform prevPanel = _currentPanel;
             if (CurrentMode == EquipmentMode.PICKABLES)
             {
                 PanelPickableList.gameObject.SetActive(true);
@@ -340,6 +341,10 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 _currentPanel = PanelUsableList;
             }
             ButtonEquipmentPickableToggle.GetComponent<ButtonEquipmentPanelToggle>().SwitchMode(CurrentMode);
+            if(_currentPanel.GetComponent<PanelGeneric>().Hidden)
+            {
+                _currentPanel.GetComponent<PanelGeneric>().Show(!prevPanel.GetComponent<PanelGeneric>().Hidden);
+            }
         }
     }
 
