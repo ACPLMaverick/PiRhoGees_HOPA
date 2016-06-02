@@ -34,6 +34,16 @@ public class DisappearableObject : MonoBehaviour
     protected bool _disappearInProgress = false;
     protected SpriteRenderer _otdSpriteRenderer;
     protected DisappearableObject[] _doInChildren;
+    protected List<Key> _keysWhichLockMe = new List<Key>();
+
+    protected bool IsLockedByKey
+    {
+        get
+        {
+            return _keysWhichLockMe.Count != 0;
+        }
+    }
+
 
     #endregion
 
@@ -75,9 +85,28 @@ public class DisappearableObject : MonoBehaviour
 	
 	}
 
+    public void LockWithKey(Key key)
+    {
+        _keysWhichLockMe.Add(key);
+    }
+
+    public void UnlockWithKey(Key key)
+    {
+        if(_keysWhichLockMe.Contains(key))
+        {
+            _keysWhichLockMe.Remove(key);
+        }
+
+        OnClickUp(Camera.main.WorldToScreenPoint(GetComponent<Transform>().position), GetComponent<Collider2D>());
+    }
+
     protected virtual void OnClickUp(Vector2 screenPos, Collider2D hitCollider2D)
     {
-        if(gameObject != null && hitCollider2D != null && hitCollider2D.gameObject == gameObject && !NonDirect)
+        if(gameObject != null && 
+            hitCollider2D != null && 
+            hitCollider2D.gameObject == gameObject && 
+            !NonDirect &&
+            !IsLockedByKey)
         {
             OnClickUpInternal(screenPos, hitCollider2D);
         }

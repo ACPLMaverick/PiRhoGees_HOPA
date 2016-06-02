@@ -35,6 +35,7 @@ public class PickableUsableObject : PickableObject
     private bool _actionsLocked = false;
     private Transform _tempTransform = null;
     private Canvas _canvasForSelectedUsable = null;
+    private bool _destroyOnClickUp = false;
 
     #endregion
 
@@ -82,9 +83,10 @@ public class PickableUsableObject : PickableObject
 
             StartCoroutine(FlyToTarget(tgt, scl, FADE_OUT_TIME_SEC));
 
+            AudioManager.Instance.PlayClip(PickUpSound);
 
             EquipmentManager.Instance.AddObjectToPool(this, FADE_OUT_TIME_SEC);
-            InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);
+            InputManager.Instance.OnInputClickUp.RemoveListener(PickUp);
 
             _picked = true;
             OnPickedUp.Invoke(this);
@@ -103,44 +105,64 @@ public class PickableUsableObject : PickableObject
     {
         if (!_actionsLocked)
         {
-            _actionsLocked = true;
-            StartCoroutine(OnClickUpReturnToSlotCoroutine(_container.UsableField.GetComponent<RectTransform>().position, _startSlotPosition, 0.5f));
-
+            bool actionDone = false;
             // check for mouse collisions with scene objects
             RaycastHit2D[] hits = InputManager.Instance.GetRaycastHitsUnderCursor();
             int objectsLayerID = LayerMask.NameToLayer("Objects");
-            if(hits.Length == 0)
+            int hl = hits.Length;
+            if(hl == 0)
             {
-                return;
-            }
-            Collider2D col = hits[0].collider;
-            if (col != null && col.gameObject.layer == objectsLayerID)
-            {
-                PerformActionOnClick(col.gameObject);
-                return;
+                actionDone = true;
             }
 
-            // check for collisions with equipment elements
-            PointerEventData pData = new PointerEventData(EventSystem.current);
-            pData.position = InputManager.Instance.CursorCurrentPosition;
-            List<RaycastResult> results = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(pData, results);
-
-            int length = results.Count;
-            for(int i = 0; i < length; ++i)
+            for(int i = 0; i < hl; ++i)
             {
-                if (results[i].gameObject.layer == objectsLayerID && results[i].gameObject != _container.UsableField.gameObject)
+                if (!actionDone && hits[i].collider != null && hits[i].collider.gameObject.layer == objectsLayerID)
                 {
-                    UsableContainerField field = results[i].gameObject.GetComponent<UsableContainerField>();
-                    if (field != null && !field.Container.IsFree)
+                    PerformActionOnClick(hits[i].collider.gameObject);
+                    actionDone = true;
+                }
+            }
+            
+
+            if(!actionDone)
+            {
+                // check for collisions with equipment elements
+                PointerEventData pData = new PointerEventData(EventSystem.current);
+                pData.position = InputManager.Instance.CursorCurrentPosition;
+                List<RaycastResult> results = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(pData, results);
+
+                int length = results.Count;
+                for (int i = 0; i < length; ++i)
+                {
+                    if (results[i].gameObject.layer == objectsLayerID && results[i].gameObject != _container.UsableField.gameObject)
                     {
-                        PerformActionOnClick(field.Container.AssociatedObject.gameObject);
-                        return;
+                        UsableContainerField field = results[i].gameObject.GetComponent<UsableContainerField>();
+                        if (field != null && !field.Container.IsFree)
+                        {
+                            PerformActionOnClick(field.Container.AssociatedObject.gameObject);
+                            actionDone = true;
+                        }
                     }
                 }
             }
+            
+            if(!actionDone)
+            {
+                PerformActionOnClick(null);
+            }
 
-            PerformActionOnClick(null);
+            _actionsLocked = true;
+
+            if(_destroyOnClickUp)
+            {
+                Destroy(gameObject, 0.6f);
+            }
+            else
+            {
+                StartCoroutine(OnClickUpReturnToSlotCoroutine(_container.UsableField.GetComponent<RectTransform>().position, _startSlotPosition, 0.5f));
+            }
         }
     }
 
@@ -188,6 +210,11 @@ public class PickableUsableObject : PickableObject
             //Debug.Log(other.name);
             other.GetComponent<Animator>().enabled = true;
         }
+    }
+
+    protected void ScheduleToDestroyOnClickUp()
+    {
+        _destroyOnClickUp = true;
     }
 
     #endregion

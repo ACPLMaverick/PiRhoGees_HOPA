@@ -84,7 +84,7 @@ public class PickableObject : MonoBehaviour
     // Use this for initialization
     protected virtual void Start ()
     {
-        InputManager.Instance.OnInputClickDown.AddListener(PickUp);
+        InputManager.Instance.OnInputClickUp.AddListener(PickUp);
 
         if(PickUpSound == null)
         {
@@ -137,7 +137,7 @@ public class PickableObject : MonoBehaviour
             AudioManager.Instance.PlayClip(PickUpSound);
 
             EquipmentManager.Instance.AddObjectToList(this, FADE_OUT_TIME_SEC);
-            InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);
+            InputManager.Instance.OnInputClickUp.RemoveListener(PickUp);
             //col.gameObject.transform.SetParent(Camera.main.transform, true);
 
             _picked = true;

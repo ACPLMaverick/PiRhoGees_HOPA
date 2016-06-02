@@ -79,7 +79,7 @@ public class Letter : PickableObject
             }
             tgt.z = transform.position.z;
 
-            InputManager.Instance.OnInputClickDown.RemoveListener(PickUp);
+            InputManager.Instance.OnInputClickUp.RemoveListener(PickUp);
             StartCoroutine(Utility.FadeCoroutine(GetComponent<SpriteRenderer>(), 1.0f, 0.0f, 0.3f, false));
             _picked = true;
 

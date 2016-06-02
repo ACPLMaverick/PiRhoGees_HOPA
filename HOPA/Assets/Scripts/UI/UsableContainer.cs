@@ -45,7 +45,7 @@ public class UsableContainer : MonoBehaviour
         UsableField.UsableImage.enabled = true;
         if(isActiveAndEnabled)
         {
-            StartCoroutine(AddObjectToPoolFadeCoroutine(0.6f, 0.0f, 1.0f));
+            StartCoroutine(AddObjectToPoolFadeCoroutine(0.6f, 0.0f, 1.0f, true));
         }
         else
         {
@@ -53,7 +53,15 @@ public class UsableContainer : MonoBehaviour
         }
     }
 
-    private IEnumerator AddObjectToPoolFadeCoroutine(float timeSeconds, float startOpacity, float targetOpacity)
+    public void UnassignEquipmentUsable()
+    {
+        if(AssociatedObject != null)
+        {
+            StartCoroutine(AddObjectToPoolFadeCoroutine(0.6f, 1.0f, 0.0f, false));
+        }
+    }
+
+    private IEnumerator AddObjectToPoolFadeCoroutine(float timeSeconds, float startOpacity, float targetOpacity, bool assign)
     {
         float cTime = Time.time;
         UsableField.UsableCanvasGroup.alpha = startOpacity;
@@ -66,6 +74,13 @@ public class UsableContainer : MonoBehaviour
             yield return null;
         }
         UsableField.UsableCanvasGroup.alpha = targetOpacity;
+
+        if(!assign)
+        {
+            AssociatedObject = null;
+            UsableField.UsableImage.sprite = null;
+            UsableField.UsableImage.enabled = false;
+        }
 
         yield return null;
     }

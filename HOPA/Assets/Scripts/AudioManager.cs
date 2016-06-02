@@ -10,6 +10,7 @@ public class AudioManager : Singleton<AudioManager>
     public bool IsAudioMuted;
 
     public AudioClip DefaultSoundPickUp;
+    public AudioClip DefaultSoundKeyUnlock;
 
     #endregion
 

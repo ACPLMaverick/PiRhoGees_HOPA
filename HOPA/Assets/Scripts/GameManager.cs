@@ -70,6 +70,18 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    public void TogglePauseMenu()
+    {
+        if(PauseMenuGroup.gameObject.activeSelf)
+        {
+            PauseMenuGroup.Hide();
+        }
+        else
+        {
+            PauseMenuGroup.Show();
+        }
+    }
+
     public void ShowPauseMenu()
     {
         PauseMenuGroup.Show();
