@@ -5,6 +5,12 @@ using System.Collections.Generic;
 
 public class GameManager : Singleton<GameManager>
 {
+    #region const
+
+    private const float WAIT_FOR_ENDING_PHOTO_SECONDS = 6.0f;
+
+    #endregion
+
     #region public
 
     public Room CurrentRoom;
@@ -16,12 +22,11 @@ public class GameManager : Singleton<GameManager>
     public Room RoomSecondPuzzle;
     public Room RoomThird;
     public Room RoomFourth;
-
+    public EndingPhoto EndingPhoto;
     public Image FadeImage;
     public ItemInfo ItemInfoGroup;
     public PauseMenu PauseMenuGroup;
-    public Text ClearedText;
-    public Text PuzzleSolvedText;
+
     public float RoomTransitionTime = 2.0f;
 
     #endregion
@@ -40,11 +45,7 @@ public class GameManager : Singleton<GameManager>
         RoomSecond.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomCommonPickablesCollected));
         RoomSecondPuzzle.FinishedEvent.AddListener(new UnityEngine.Events.UnityAction<Room>(OnRoomAssignPuzzleFinished));
 
-        ClearedText.GetComponent<CanvasGroup>().alpha = 0.0f;
-        ClearedText.gameObject.SetActive(false);
 
-        PuzzleSolvedText.GetComponent<CanvasGroup>().alpha = 0.0f;
-        PuzzleSolvedText.gameObject.SetActive(false);
 
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
         CurrentRoom.Initialize();
@@ -57,7 +58,11 @@ public class GameManager : Singleton<GameManager>
 	// Update is called once per frame
 	void Update ()
     {
-	
+	    // for tetin
+        //if(Input.GetKeyUp(KeyCode.P))
+        //{
+        //    OnRoomCommonPickablesCollected(RoomFirst);
+        //}
 	}
 
     public void TransitionToRoom(Room room)
@@ -168,12 +173,14 @@ public class GameManager : Singleton<GameManager>
 
     private void OnRoomCommonPickablesCollected(Room r)
     {
-        StartCoroutine(RoomFinishedCoroutine(r, ClearedText));
+        EndingPhoto.Show(r.EndingPhotoSprite, r.EndingPhotoTextSprite);
+        StartCoroutine(RoomFinishedCoroutine(r));
     }
 
     private void OnRoomAssignPuzzleFinished(Room r)
     {
-        StartCoroutine(RoomFinishedCoroutine(r, PuzzleSolvedText));
+        EndingPhoto.Show(r.EndingPhotoSprite, r.EndingPhotoTextSprite);
+        StartCoroutine(RoomFinishedCoroutine(r));
     }
 
     //private void OnRoom0PickablesCollected()
@@ -181,11 +188,14 @@ public class GameManager : Singleton<GameManager>
     //    StartCoroutine(OnRoom0PickablesCollectedCoroutine());
     //}
 
-    private IEnumerator RoomFinishedCoroutine(Room r, Text t)
+    private IEnumerator RoomFinishedCoroutine(Room r)
     {
-        t.gameObject.SetActive(true);
-        RectTransform rt = t.GetComponent<RectTransform>();
-        CanvasGroup cg = t.GetComponent<CanvasGroup>();
+        yield return new WaitForSeconds(WAIT_FOR_ENDING_PHOTO_SECONDS);
+
+        //t.gameObject.SetActive(true);
+        //RectTransform rt = t.GetComponent<RectTransform>();
+        //CanvasGroup cg = t.GetComponent<CanvasGroup>();
+        /*
         Vector2 startScale = new Vector2(0.5f, 0.5f);
         float startAlpha = 0.0f;
         Vector2 targetScale = new Vector2(1.0f, 1.0f);
@@ -206,13 +216,13 @@ public class GameManager : Singleton<GameManager>
             Vector2 finalScale = Vector2.Lerp(startScale, targetScale, lerpValue);
             float finalAlpha = Mathf.Lerp(startAlpha, targetAlpha, lerpValue);
 
-            rt.localScale = finalScale;
-            cg.alpha = finalAlpha;
+            //rt.localScale = finalScale;
+            //cg.alpha = finalAlpha;
 
             yield return null;
         }
-        rt.localScale = targetScale;
-        cg.alpha = targetAlpha;
+        //rt.localScale = targetScale;
+        //cg.alpha = targetAlpha;
 
         yield return new WaitForSeconds(timeSecondsStay);
 
@@ -225,16 +235,17 @@ public class GameManager : Singleton<GameManager>
             Vector2 finalScale = Vector2.Lerp(targetScale, startScale, lerpValue);
             float finalAlpha = Mathf.Lerp(targetAlpha, startAlpha, lerpValue);
 
-            rt.localScale = finalScale;
-            cg.alpha = finalAlpha;
+            //rt.localScale = finalScale;
+            //cg.alpha = finalAlpha;
 
             yield return null;
         }
-        rt.localScale = startScale;
-        cg.alpha = startAlpha;
-        t.gameObject.SetActive(false);
+        //rt.localScale = startScale;
+        //cg.alpha = startAlpha;
+        //t.gameObject.SetActive(false);
 
         //r.Leave();
+        */
 
         if (r.PuzzleRoom != null)
         {

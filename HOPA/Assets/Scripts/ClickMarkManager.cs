@@ -131,7 +131,6 @@ public class ClickMarkManager : Singleton<ClickMarkManager>
         while(time < TimeTakesSeconds)
         {
             time += Time.deltaTime;
-            Debug.Log(time);
             Vector3 scl = Vector3.Lerp(Vector3.zero, Vector3.one, time);
             float alphaMplier = 0.0f;
 
