@@ -68,7 +68,12 @@ public class GameManager : Singleton<GameManager>
     public void TransitionToRoom(Room room)
     {
         _nextRoom = room;
-        StartCoroutine(StartMoveCoroutine());
+        if(room is RoomPuzzleAssign)
+        {
+            StartCoroutine(StartMoveCoroutine(11));
+        }
+        else 
+            StartCoroutine(StartMoveCoroutine(7));
         if (CurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != CurrentRoom)
         {
             AudioManager.Instance.PlayMusic(room.AmbientTheme, RoomTransitionTime);
@@ -114,7 +119,7 @@ public class GameManager : Singleton<GameManager>
         SceneChangeManager.Instance.ChangeScene(0);
     }
 
-    private IEnumerator StartMoveCoroutine()
+    private IEnumerator StartMoveCoroutine(int tutorialMsg)
     {
         float cTime = Time.time;
         FadeImage.gameObject.SetActive(true);
@@ -130,7 +135,7 @@ public class GameManager : Singleton<GameManager>
         MoveToCurrentRoom();
 
         //Thanks to this, tutorial message will appear when screen fades out
-        TutorialManager.Instance.GoStepFurther();
+        TutorialManager.Instance.GoStepFurther(tutorialMsg);
 
         yield return null;
     }
@@ -255,6 +260,8 @@ public class GameManager : Singleton<GameManager>
                 r.PuzzleRoom.UnlockMapPart();
             }
             TransitionToRoom(r.PuzzleRoom);
+
+            //TutorialManager.Instance.GoStepFurther(11);
         }
         else
         {
