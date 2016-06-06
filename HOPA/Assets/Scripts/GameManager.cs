@@ -7,7 +7,7 @@ public class GameManager : Singleton<GameManager>
 {
     #region const
 
-    private const float WAIT_FOR_ENDING_PHOTO_SECONDS = 6.0f;
+    private const float WAIT_FOR_ENDING_PHOTO_SECONDS = 7.5f;
 
     #endregion
 

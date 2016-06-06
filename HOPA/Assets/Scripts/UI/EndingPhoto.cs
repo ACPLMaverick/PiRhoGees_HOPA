@@ -6,6 +6,7 @@ public class EndingPhoto : MonoBehaviour
 {
     #region const
 
+    const float BEGIN_DELAY_SECONDS = 1.5f;
     const float FLASH_FADEIN_SECONDS = 0.1f;
     const float FLASH_FADEOUT_SECONDS = 0.5f;
     const float WAIT_AFTER_FLASH_SECONDS = 3.0f;
@@ -97,6 +98,8 @@ public class EndingPhoto : MonoBehaviour
 
     private IEnumerator ShowCoroutine()
     {
+        yield return new WaitForSeconds(BEGIN_DELAY_SECONDS);
+
         float time = 0.0f;
         while((time += Time.deltaTime) <= FLASH_FADEIN_SECONDS)
         {
