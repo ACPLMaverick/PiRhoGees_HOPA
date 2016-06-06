@@ -117,6 +117,10 @@ public class Room : MonoBehaviour
         if(!_finished)
         {
             _finished = true;
+
+            if(AssociatedMapPart != null)
+                AssociatedMapPart.Finish();
+
             OnFinished();
         }
     }

@@ -23,6 +23,7 @@ public class MapPart : MonoBehaviour
 
     protected Button _roomButton;
     protected Text _roomText;
+    protected Image _finishedImg;
 
     #endregion
 
@@ -35,6 +36,7 @@ public class MapPart : MonoBehaviour
         _roomButton = GetComponentInChildren<Button>();
         _roomButton.onClick.AddListener(new UnityAction(OnClick));
         _roomText = GetComponentInChildren<Text>();
+        _finishedImg = GetComponentsInChildren<Image>(true)[1];
     }
 
     // Use this for initialization
@@ -58,6 +60,12 @@ public class MapPart : MonoBehaviour
     public void Unlock()
     {
         _roomButton.interactable = true;
+    }
+
+    public void Finish()
+    {
+        _roomButton.interactable = false;
+        _finishedImg.gameObject.SetActive(true);
     }
 
     protected void OnClick()

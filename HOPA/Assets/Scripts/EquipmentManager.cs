@@ -17,9 +17,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
     #endregion
 
     #region constants
-
-    private int USABLE_MAX_ITEMS = 5;
-
     #endregion
 
     #region public
@@ -55,7 +52,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     {
         get
         {
-            return _usableContainersOccupiedCount < USABLE_MAX_ITEMS;
+            return _usableContainersOccupiedCount < _usableContainers.Length;
         }
     }
     public bool Enabled
@@ -147,7 +144,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     public void AddObjectToPool(PickableUsableObject obj, float lagSeconds)
     {
-        if(_usableContainersOccupiedCount == USABLE_MAX_ITEMS)
+        if(_usableContainersOccupiedCount == _usableContainers.Length)
         {
             return;
         }
@@ -174,17 +171,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
     public void FlushOnNextRoom()
     {
         _allPickablesDict.Clear();
-
-        Text[] itemtexts = PanelPickableList.GetComponentsInChildren<Text>();
-        int count = itemtexts.Length;
-
-        for(int i = 0; i < count; ++i)
-        {
-            if(!itemtexts[i].name.Contains("Text"))
-            {
-                Destroy(itemtexts[i].gameObject);
-            }
-        }
 
         StartGUIPickables();
 
@@ -225,7 +211,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
         yield return new WaitForSeconds(lagSeconds);
 
         UsableContainer container = null;
-        for(int i = 0; i < USABLE_MAX_ITEMS; ++i)
+        for(int i = 0; i < _usableContainers.Length; ++i)
         {
             container = _usableContainers[i];
             if(container.IsFree)
@@ -253,74 +239,49 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     private void StartGUIUsables()
     {
-        _usableContainers = new UsableContainer[USABLE_MAX_ITEMS];
-
-        Vector2 firstPos = PanelUsableList.position;
-        firstPos.y = (PanelUsableList.position.y + 47.0f) /*+ PanelUsableList.rect.height * 0.33f*/ * PanelUsableList.GetComponent<Image>().canvas.scaleFactor;
-        GameObject container = (GameObject)Instantiate(UsableListElementPrefab, firstPos, Quaternion.identity);
-        float panelWidth = container.GetComponent<RectTransform>().rect.width;
-        float objTotalDelta = panelWidth * PanelUsableList.GetComponent<Image>().canvas.scaleFactor + 20.0f;
-        float containerWidth = container.GetComponent<Image>().rectTransform.rect.width;
-        firstPos.x -= 250.0f;
-        container.transform.position = firstPos;
-        Vector3 scaleAbsolute = container.transform.lossyScale;
-        container.transform.SetParent(PanelUsableList.transform, true);
-        _usableContainers[0] = container.GetComponent<UsableContainer>();
-
-        for (int i = 1; i < USABLE_MAX_ITEMS; ++i)
-        {
-            firstPos.x += objTotalDelta;
-            container = (GameObject)Instantiate(UsableListElementPrefab, firstPos, Quaternion.identity);
-            container.transform.SetParent(PanelUsableList.transform, true);
-            _usableContainers[i] = container.GetComponent<UsableContainer>();
-        }
+        _usableContainers = PanelUsableList.GetComponentsInChildren<UsableContainer>();
         
-        for (int i = 0; i < USABLE_MAX_ITEMS; ++i)
+        for (int i = 0; i < _usableContainers.Length; ++i)
         {
             _usableContainers[i].UsableField.UsableImage.enabled = false;
             _usableContainers[i].UsableField.UsableCanvasGroup.alpha = 0.0f;
-            _usableContainers[i].transform.localScale = scaleAbsolute;
         }
     }
 
     private void StartGUIPickables()
     {
         List<PickableObject> pickablesOnLevel = GameManager.Instance.CurrentRoom.PickableObjects;
+        CanvasGroup cg = PanelPickableList.GetComponentInChildren<CanvasGroup>();
+        Text[] fields = cg.GetComponentsInChildren<Text>(true);
 
-        Vector2 firstPos = PanelPickableList.position;
-        firstPos.x -= PanelPickableList.rect.width * 0.36f * PanelPickableList.GetComponent<Image>().canvas.scaleFactor;
-        firstPos.y += PanelPickableList.rect.height * 0.67f * PanelPickableList.GetComponent<Image>().canvas.scaleFactor;
+
         int i = 0;
-        Vector2 nextPos = firstPos;
         foreach(PickableObject obj in pickablesOnLevel)
         {
-            GameObject newobj = (GameObject)Instantiate(PickableListElementPrefab, nextPos, Quaternion.identity);
-            newobj.transform.SetParent(PanelPickableList.transform, true);
-            Text text = newobj.GetComponent<Text>();
-            text.text = obj.Name;
+            fields[i].gameObject.SetActive(true);
+            Button button = fields[i].GetComponent<Button>();
+            fields[i].text = obj.Name;
 
             // Assigning list element to pickable object here
-            obj.AssociatedListElement = newobj.GetComponent<Button>();
-
-            RectTransform rt = newobj.GetComponent<RectTransform>();
-            if (i % 3 == 0 && i != 0)
-            {
-                nextPos.y -= rt.rect.height;
-                nextPos.x = firstPos.x;
-            }
-            else if(i != 0)
-            {
-                nextPos.x += rt.rect.width;
-            }
-            newobj.transform.position = nextPos;
+            obj.AssociatedListElement = button;
+            button.enabled = true;
 
             if(GameManager.Instance.CurrentRoom.PickablePickedObjectIDs.Contains(obj.ID))
             {
-                ChangeTextToPicked(text);
+                ChangeTextToPicked(fields[i]);
             }
 
-            _allPickablesDict.Add(obj, text);
+            _allPickablesDict.Add(obj, fields[i]);
             ++i;
+        }
+
+
+        // shutting down remaining fields
+        for(int j = i; j < fields.Length; ++j)
+        {
+            fields[j].gameObject.SetActive(false);
+            fields[j].text = "";
+            fields[j].GetComponent<Button>().enabled = false;
         }
     }
 
