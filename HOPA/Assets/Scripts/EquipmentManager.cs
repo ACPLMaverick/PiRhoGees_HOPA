@@ -256,14 +256,14 @@ public class EquipmentManager : Singleton<EquipmentManager>
         _usableContainers = new UsableContainer[USABLE_MAX_ITEMS];
 
         Vector2 firstPos = PanelUsableList.position;
-        firstPos.y = PanelUsableList.position.y + PanelUsableList.rect.height * 0.39f * PanelUsableList.GetComponent<Image>().canvas.scaleFactor;
+        firstPos.y = (PanelUsableList.position.y + 47.0f) /*+ PanelUsableList.rect.height * 0.33f*/ * PanelUsableList.GetComponent<Image>().canvas.scaleFactor;
         GameObject container = (GameObject)Instantiate(UsableListElementPrefab, firstPos, Quaternion.identity);
-        float xDelta = ((container.GetComponent<Image>()).rectTransform.rect.width) * 0.25f;
         float panelWidth = container.GetComponent<RectTransform>().rect.width;
-        float objTotalDelta = panelWidth + xDelta;
+        float objTotalDelta = panelWidth * PanelUsableList.GetComponent<Image>().canvas.scaleFactor + 20.0f;
         float containerWidth = container.GetComponent<Image>().rectTransform.rect.width;
-        firstPos.x += (panelWidth - (USABLE_MAX_ITEMS * containerWidth + (USABLE_MAX_ITEMS - 1) * xDelta)) * 0.5f;
+        firstPos.x -= 250.0f;
         container.transform.position = firstPos;
+        Vector3 scaleAbsolute = container.transform.lossyScale;
         container.transform.SetParent(PanelUsableList.transform, true);
         _usableContainers[0] = container.GetComponent<UsableContainer>();
 
@@ -279,6 +279,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
         {
             _usableContainers[i].UsableField.UsableImage.enabled = false;
             _usableContainers[i].UsableField.UsableCanvasGroup.alpha = 0.0f;
+            _usableContainers[i].transform.localScale = scaleAbsolute;
         }
     }
 

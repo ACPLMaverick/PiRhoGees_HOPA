@@ -112,7 +112,7 @@ public class PickableObject : MonoBehaviour
             GameManager.Instance.ItemInfoGroup.Show(GetComponent<SpriteRenderer>().sprite, Name);
         }
 
-        TutorialManager.Instance.GoStepFurther();
+        TutorialManager.Instance.GoStepFurther(9);
     }
 
     protected virtual void PickUp(Vector2 position, Collider2D col)

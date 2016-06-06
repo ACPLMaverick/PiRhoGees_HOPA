@@ -18,6 +18,11 @@ public class Letter : PickableObject
     #region public
     public LetterUI LetterObj;
     public int LetterID;
+    #endregion
+
+    #region private
+
+
     private string _headerText = "{0}";
     private string _contextText = "Pragnę serdecznie powitać {0} na stanowisku młodszego asystena ds. organizacji wystaw. " +
                                     "To wspaniałe, że wśród młodzieży wciąż znajdują się osoby chętne do pracy w instytucjach kulturowych, " +
@@ -43,9 +48,6 @@ public class Letter : PickableObject
                                     " spośród dostępnych opcji wybrać tę, która pasuje do przedstawionego na zdjęciu kadru.\n" +
                                     "Życzę powodzenia.\n\n" +
                                     "Stefan Grajgór";
-    #endregion
-
-    #region private
 
     #endregion
 
@@ -113,7 +115,7 @@ public class Letter : PickableObject
                 break;
         }
 
-        //LetterObj.Show(_headerText, _contextText, _secondSideContextText, true);
+        LetterObj.Show(_headerText, _contextText, _secondSideContextText, true);
     }
 
     protected void PageTurned()

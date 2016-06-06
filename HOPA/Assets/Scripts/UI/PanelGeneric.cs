@@ -61,7 +61,6 @@ public class PanelGeneric : MonoBehaviour
     {
         if(gameObject.activeSelf)
         {
-            TutorialManager.Instance.GoStepFurther(8);
             if(_isHidden)
             {
                 Show(false);
