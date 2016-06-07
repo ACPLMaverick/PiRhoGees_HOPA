@@ -36,7 +36,7 @@ public class MapPart : MonoBehaviour
         _roomButton = GetComponentInChildren<Button>();
         _roomButton.onClick.AddListener(new UnityAction(OnClick));
         _roomText = GetComponentInChildren<Text>();
-        _finishedImg = GetComponentsInChildren<Image>(true)[1];
+        _finishedImg = GetComponentsInChildren<Image>(true)[2];
     }
 
     // Use this for initialization

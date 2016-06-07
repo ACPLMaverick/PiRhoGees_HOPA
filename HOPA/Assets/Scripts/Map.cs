@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class Map : PickableUsableObject
+public class Map : MonoBehaviour
 {
     #region const
 
@@ -20,6 +20,7 @@ public class Map : PickableUsableObject
     public AudioClip SoundFold;
     public List<Room> RoomsOnMap;
     public GameObject MapElementPrefab;
+    public AudioClip PickUpSound;
 
     #endregion
 
@@ -45,9 +46,9 @@ public class Map : PickableUsableObject
     #region functions
 
     // Use this for initialization
-    override protected void Start ()
+    protected void Start ()
     {
-        base.Start();
+        InputManager.Instance.OnInputClickUp.AddListener(PickUp);
 
         _totalMapLength = RoomsOnMap.Count + 1;
 
@@ -96,6 +97,7 @@ public class Map : PickableUsableObject
 
             MapPart mp = container.GetComponent<MapPart>();
             mp.AssociatedRoom = room;
+            room.AssociatedMapPart = mp;
             mp.ClickedEvent.AddListener(new UnityAction<MapPart>(OnMapButtonClick));
             if(room.Locked)
             {
@@ -124,20 +126,22 @@ public class Map : PickableUsableObject
         MapObject.alpha = 0.0f;
     }
 
-    protected override void PickUp(Vector2 position, Collider2D col)
+    protected void PickUp(Vector2 position, Collider2D col)
     {
-        if (col != null && col.gameObject == this.gameObject && EquipmentManager.Instance.EquipmentFreeContainersAvailable && !_picked)
+        if (col != null && col.gameObject == this.gameObject)
         {
+            InputManager.Instance.OnInputClickUp.RemoveListener(PickUp);
+            EquipmentManager.Instance.HasMap = true;
             TutorialManager.Instance.GoStepFurther();
+            AudioManager.Instance.PlayClip(PickUpSound);
+            StartCoroutine(Utility.FadeCoroutine(GetComponent<SpriteRenderer>(), 1.0f, 0.0f, 1.0f, true));
+            StartCoroutine(FlyToTarget(Camera.main.ScreenToWorldPoint(EquipmentManager.Instance.ButtonMap.transform.position), Vector3.zero, 1.0f));
         }
-
-        base.PickUp(position, col);
     }
 
     // Update is called once per frame
-    override protected void Update ()
+    protected void Update ()
     {
-        base.Update();
 	}
 
     protected void MoveInDirection(Vector2 origin, InputManager.SwipeDirection dirEnum, float length, Collider2D col)
@@ -228,7 +232,7 @@ public class Map : PickableUsableObject
 
         if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            EquipmentManager.Instance.DisplayBackButton(false, EquipmentManager.Instance.ButtonBack.interactable);
+            EquipmentManager.Instance.DisplayMapButton(false, EquipmentManager.Instance.ButtonBack.interactable);
         }
         MapObject.gameObject.SetActive(true);
         SetEdgeFadeOnPosition(_currentMapPosition);
@@ -246,7 +250,7 @@ public class Map : PickableUsableObject
     {
         if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            EquipmentManager.Instance.DisplayBackButton(true, EquipmentManager.Instance.ButtonBack.interactable);
+            EquipmentManager.Instance.DisplayMapButton(true, EquipmentManager.Instance.ButtonBack.interactable);
         }
         StartCoroutine(MapVisibilityCoroutine(1.0f, 0.0f, true, false));
         _isEnabled = false;
@@ -327,23 +331,22 @@ public class Map : PickableUsableObject
         yield return null;
     }
 
-    protected override void PerformActionOnClick(GameObject other)
+    protected IEnumerator FlyToTarget(Vector3 targetPos, Vector3 targetScale, float time)
     {
-        if(other == null || other == gameObject)
+        float currentTime = Time.time;
+        Vector3 startPos = transform.position;
+        Vector3 startScale = transform.localScale;
+        while (Time.time - currentTime <= time)
         {
-            if(_isEnabled)
-            {
-                HideMap();
-            }
-            else
-            {
-                ShowMap();
-            }
+            float lerp = (Time.time - currentTime) / time;
+
+            transform.position = Vector3.Lerp(startPos, targetPos, lerp);
+            transform.localScale = Vector3.Lerp(startScale, targetScale, lerp);
+            yield return null;
         }
-        else
-        {
-            Debug.Log(other.name);
-        }
+
+        transform.parent = EquipmentManager.Instance.transform;
+        yield return null;
     }
 
     #endregion

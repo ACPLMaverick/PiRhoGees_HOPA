@@ -152,7 +152,7 @@ public class PickableObject : MonoBehaviour
     {
         if(AssociatedListElement != null)
         {
-            EquipmentManager.Instance.ChangeTextToPicked(AssociatedListElement.GetComponent<Text>());
+            EquipmentManager.Instance.ChangeTextPickedStatus(AssociatedListElement.GetComponent<Text>(), true);
             AssociatedListElement.GetComponent<Button>().onClick.RemoveListener(_actionOnListElementClick);
         }
         GameObject.DestroyImmediate(this.gameObject);

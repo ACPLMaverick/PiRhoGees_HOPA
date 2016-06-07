@@ -26,6 +26,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     public GameObject PickableListElementPrefab;
     public GameObject UsableListElementPrefab;
     public Button ButtonEquipmentPickableToggle;
+    public Button ButtonMap;
     public Button ButtonBack;
 
     #endregion
@@ -91,6 +92,19 @@ public class EquipmentManager : Singleton<EquipmentManager>
         }
     }
 
+    public bool HasMap
+    {
+        get
+        {
+            return _hasMap;
+        }
+        set
+        {
+            _hasMap = value;
+            ButtonMap.interactable = _hasMap;
+        }
+    }
+
     #endregion
 
     #region private
@@ -98,6 +112,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     private EquipmentMode _currentMode;
     private RectTransform _currentPanel;
     private bool _enabled = true;
+    private bool _hasMap = false;
 
     private List<PickableObject> _pickableList;
     private List<PickableUsableObject> _usableList;
@@ -107,6 +122,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
     private UsableContainer[] _usableContainers;
     private int _usableContainersOccupiedCount = 0;
 
+    [SerializeField]
     private Map _map;
 
     #endregion
@@ -129,6 +145,8 @@ public class EquipmentManager : Singleton<EquipmentManager>
         CurrentMode = EquipmentMode.USABLES;
         PanelUsableList.GetComponent<PanelGeneric>().Hide(true);
         PanelPickableList.GetComponent<PanelGeneric>().Hide(true);
+
+        HasMap = false;
     }
 	
 	// Update is called once per frame
@@ -149,11 +167,6 @@ public class EquipmentManager : Singleton<EquipmentManager>
             return;
         }
 
-        if(obj.GetComponent<Map>() != null)
-        {
-            _map = obj.GetComponent<Map>();
-        }
-
         StartCoroutine(AddObjectToPoolCoroutine(obj, lagSeconds));
         if(CurrentMode == EquipmentMode.USABLES)
         {
@@ -165,7 +178,14 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
     public void OnButtonEquipmentPanelToggle()
     {
-        CurrentMode = (EquipmentMode)(((int)CurrentMode + 1) % 2);
+        if(_currentPanel.GetComponent<PanelGeneric>().Hidden)
+        {
+            _currentPanel.GetComponent<PanelGeneric>().Show(false);
+        }
+        else
+        {
+            CurrentMode = (EquipmentMode)(((int)CurrentMode + 1) % 2);
+        }
     }
 
     public void FlushOnNextRoom()
@@ -186,24 +206,24 @@ public class EquipmentManager : Singleton<EquipmentManager>
     {
         if(_map != null)
         {
-            if(CurrentMode == EquipmentMode.PICKABLES)
-            {
-                SwitchPanel();
-            }
+            //if(CurrentMode == EquipmentMode.PICKABLES)
+            //{
+            //    SwitchPanel();
+            //}
             _map.ShowMap();
         }
     }
 
-    public void DisplayBackButton(bool display, bool interactable)
+    public void DisplayMapButton(bool display, bool interactable)
     {
         ButtonBack.gameObject.SetActive(display);
         ButtonBack.interactable = interactable;
     }
 
-    public void ChangeTextToPicked(Text text)
+    public void ChangeTextPickedStatus(Text text, bool status)
     {
-        text.fontStyle = FontStyle.BoldAndItalic;
-        text.GetComponent<Button>().interactable = false;
+        text.fontStyle = !status ? FontStyle.Bold : FontStyle.BoldAndItalic;
+        text.GetComponent<Button>().interactable = !status;
     }
 
     private IEnumerator AddObjectToPoolCoroutine(PickableUsableObject obj, float lagSeconds)
@@ -268,7 +288,11 @@ public class EquipmentManager : Singleton<EquipmentManager>
 
             if(GameManager.Instance.CurrentRoom.PickablePickedObjectIDs.Contains(obj.ID))
             {
-                ChangeTextToPicked(fields[i]);
+                ChangeTextPickedStatus(fields[i], true);
+            }
+            else
+            {
+                ChangeTextPickedStatus(fields[i], false);
             }
 
             _allPickablesDict.Add(obj, fields[i]);
@@ -303,7 +327,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 _currentPanel = PanelUsableList;
             }
             ButtonEquipmentPickableToggle.GetComponent<ButtonEquipmentPanelToggle>().SwitchMode(CurrentMode);
-            if(_currentPanel.GetComponent<PanelGeneric>().Hidden)
+            if (_currentPanel.GetComponent<PanelGeneric>().Hidden && prevPanel != null)
             {
                 _currentPanel.GetComponent<PanelGeneric>().Show(!prevPanel.GetComponent<PanelGeneric>().Hidden);
             }
