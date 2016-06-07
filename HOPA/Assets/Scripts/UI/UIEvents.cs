@@ -58,6 +58,11 @@ public class UIEvents : MonoBehaviour {
     {
         PlayerPrefs.DeleteAll();
     }
+
+    public void OnToggleFingerprintClick()
+    {
+        PlayerPrefs.SetInt("bFingerprint", 1);
+    }
     #endregion
 
     #region Quit Panel Events
