@@ -14,6 +14,7 @@ public class PanelGeneric : MonoBehaviour
     #region public
 
     public List<PanelGeneric> ConnectedPanels;
+    public Image Arrow;
 
     #endregion
 
@@ -35,6 +36,7 @@ public class PanelGeneric : MonoBehaviour
     RectTransform _rt;
     protected bool _isHidden = false;
     protected float _yStart;
+    protected Coroutine _crt;
 
     #endregion
 
@@ -88,11 +90,13 @@ public class PanelGeneric : MonoBehaviour
         {
             if (immediate)
             {
+                if(_crt != null)
+                    StopCoroutine(_crt);
                 _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x, Y_HIDDEN);
             }
             else
             {
-                StartCoroutine(Utility.TransformCoroutineUI(
+                _crt = StartCoroutine(Utility.TransformCoroutineUI(
                     _rt,
                     new Vector2(_rt.anchoredPosition.x, _yStart),
                     _rt.localRotation,
@@ -105,6 +109,7 @@ public class PanelGeneric : MonoBehaviour
                     ));
             }
 
+            Arrow.transform.rotation = Quaternion.Euler(Vector3.zero);
             _isHidden = true;
         }
     }
@@ -115,11 +120,13 @@ public class PanelGeneric : MonoBehaviour
         {
             if (immediate)
             {
+                if (_crt != null)
+                    StopCoroutine(_crt);
                 _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x, _yStart);
             }
             else
             {
-                StartCoroutine(Utility.TransformCoroutineUI(
+                _crt = StartCoroutine(Utility.TransformCoroutineUI(
                     _rt,
                     new Vector2(_rt.anchoredPosition.x, Y_HIDDEN),
                     _rt.localRotation,
@@ -132,6 +139,7 @@ public class PanelGeneric : MonoBehaviour
                     ));
             }
 
+            Arrow.transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, 180.0f));
             _isHidden = false;
         }
     }

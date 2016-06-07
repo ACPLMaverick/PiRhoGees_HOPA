@@ -6,15 +6,11 @@ public class BackButton : MonoBehaviour
 {
     #region public
 
-    public Sprite SpritePuzzle;
-    public Sprite SpriteBack;
-
     #endregion
 
     #region private
 
     private Image _img;
-    private bool _isPuzzle;
 
     #endregion
 
@@ -37,34 +33,23 @@ public class BackButton : MonoBehaviour
 	
 	}
 
-    protected void OnClick()
+    public void UpdateOnCurrentRoom()
     {
-        if(_isPuzzle)
+        if(GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            if (GameManager.Instance.CurrentRoom.PuzzleRoom != null)
-            {
-                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.PuzzleRoom);
-            }
+            gameObject.SetActive(true);
         }
         else
         {
-            if (GameManager.Instance.CurrentRoom.ParentRoom != null)
-            {
-                GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.ParentRoom);
-            }
+            gameObject.SetActive(false);
         }
     }
 
-    public void ShowAsPuzzle(bool flag)
+    protected void OnClick()
     {
-        _isPuzzle = flag;
-        if(flag)
+        if (GameManager.Instance.CurrentRoom.ParentRoom != null)
         {
-            _img.sprite = SpritePuzzle;
-        }
-        else
-        {
-            _img.sprite = SpriteBack;
+            GameManager.Instance.TransitionToRoom(GameManager.Instance.CurrentRoom.ParentRoom);
         }
     }
 

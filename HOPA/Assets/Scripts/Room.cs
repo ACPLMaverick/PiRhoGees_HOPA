@@ -130,29 +130,9 @@ public class Room : MonoBehaviour
         if(!_inRoom)
         {
             _inRoom = true;
-
-            if(PuzzleRoom != null && !PuzzleRoom.PickableAllowed)
-            {
-                EquipmentManager.Instance.ButtonBack.GetComponent<BackButton>().ShowAsPuzzle(true);
-                
-                if(PuzzleRoom.Locked)
-                {
-                    EquipmentManager.Instance.DisplayBackButton(true, false);
-                }
-                else
-                {
-                    EquipmentManager.Instance.DisplayBackButton(true, true);
-                }
-            }
-            else if (ParentRoom != null)
-            {
-                EquipmentManager.Instance.ButtonBack.GetComponent<BackButton>().ShowAsPuzzle(false);
-                EquipmentManager.Instance.DisplayBackButton(true, true);
-            }
-            else
-            {
-                EquipmentManager.Instance.DisplayBackButton(false, false);
-            }
+            EquipmentManager.Instance.ButtonBack.GetComponent<BackButton>().UpdateOnCurrentRoom();
+            EquipmentManager.Instance.PanelPickableList.GetComponent<PanelGeneric>().Hide(true);
+            EquipmentManager.Instance.PanelUsableList.GetComponent<PanelGeneric>().Hide(true);
 
             OnEntered();
         }
