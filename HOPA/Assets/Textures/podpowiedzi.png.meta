@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 6ecde745ec981de4e8f096d2ca6b5509
-timeCreated: 1462388839
-licenseType: Pro
+timeCreated: 1465379467
+licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
     21300000: podpowiedzi_0
@@ -27,10 +27,10 @@ TextureImporter:
   cubemapConvolutionSteps: 7
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
-  textureFormat: -2
-  maxTextureSize: 128
+  textureFormat: -1
+  maxTextureSize: 1024
   textureSettings:
-    filterMode: -1
+    filterMode: 0
     aniso: 16
     mipBias: -1
     wrapMode: 1
@@ -54,44 +54,20 @@ TextureImporter:
     - name: podpowiedzi_0
       rect:
         serializedVersion: 2
-        x: 603
-        y: 497
-        width: 729
-        height: 159
+        x: 600
+        y: 504
+        width: 736
+        height: 160
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: -328.5, y: -51.5}
-        - {x: -319.5, y: -43.5}
-        - {x: -308.5, y: -32.5}
-        - {x: -307.5, y: -32.5}
-        - {x: -298.5, y: -23.5}
-        - {x: 364.5, y: -23.5}
-        - {x: 364.5, y: 79.5}
-        - {x: -338.5, y: 79.5}
-        - {x: -338.5, y: 16.5}
-        - {x: -339.5, y: 15.5}
-        - {x: -340.5, y: 8.5}
-        - {x: -342.5, y: 6.5}
-        - {x: -343.5, y: 1.5}
-        - {x: -346.5, y: -7.5}
-        - {x: -347.5, y: -14.5}
-        - {x: -349.5, y: -16.5}
-        - {x: -350.5, y: -23.5}
-        - {x: -353.5, y: -29.5}
-        - {x: -354.5, y: -33.5}
-        - {x: -356.5, y: -39.5}
-        - {x: -357.5, y: -46.5}
-        - {x: -360.5, y: -52.5}
-        - {x: -361.5, y: -59.5}
-        - {x: -363.5, y: -60.5}
-        - {x: -364.5, y: -63.5}
-        - {x: -364.5, y: -79.5}
-        - {x: -359.5, y: -79.5}
-        - {x: -351.5, y: -72.5}
-        - {x: -342.5, y: -64.5}
-        - {x: -329.5, y: -51.5}
+      - - {x: -92, y: -5}
+        - {x: -92, y: -20}
+        - {x: -67, y: -20}
+        - {x: 92, y: -9}
+        - {x: 92, y: 20}
+        - {x: -88, y: 20}
     outline: []
   spritePackingTag: 
   userData: 

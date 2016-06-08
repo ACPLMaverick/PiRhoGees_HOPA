@@ -1,17 +1,32 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UIEvents : MonoBehaviour {
+    #region Private
+
+    private Text _txtToggleSoundOn;
+    private Text _txtToggleSoundOff;
+
+    #endregion
+
     #region Public
 
+    public Button AudioToggleButton;
     public GameObject OptionsPanel;
     public GameObject CreditsPanel;
     public GameObject QuitPanel;
     public GameObject TutorialPanel;
 
     #endregion
-  
+    void Start()
+    {
+        _txtToggleSoundOff = AudioToggleButton.GetComponentsInChildren<Text>()[0];
+        _txtToggleSoundOn = AudioToggleButton.GetComponentsInChildren<Text>()[1];
+
+        ToggleSoundText(AudioManager.Instance.IsAudioMuted);
+    }
 
     void Update()
     {
@@ -30,7 +45,6 @@ public class UIEvents : MonoBehaviour {
     }
 
     #region Main Buttons Events
-
     public void OnStartGameClick()
     {
         TutorialPanel.SetActive(true);
@@ -48,10 +62,17 @@ public class UIEvents : MonoBehaviour {
     }
     #endregion
 
+    private void ToggleSoundText(bool stateTo)
+    {
+        _txtToggleSoundOff.gameObject.SetActive(!stateTo);
+        _txtToggleSoundOn.gameObject.SetActive(stateTo);
+    }
+
     #region Options Panel Events
     public void OnMuteClick()
     {
-        AudioManager.Instance.ToggleMute();
+        //AudioManager.Instance.ToggleMute();
+        ToggleSoundText(AudioManager.Instance.ToggleMute());
     }
 
     public void OnClearProgressClick()

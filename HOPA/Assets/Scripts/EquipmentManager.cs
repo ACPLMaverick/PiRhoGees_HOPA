@@ -325,6 +325,8 @@ public class EquipmentManager : Singleton<EquipmentManager>
                 PanelPickableList.gameObject.SetActive(false);
                 PanelUsableList.gameObject.SetActive(true);
                 _currentPanel = PanelUsableList;
+                if(!TutorialManager.Instance.EquipmentWasShown)
+                    TutorialManager.Instance.ShowMessageOutOfQueue(12);
             }
             ButtonEquipmentPickableToggle.GetComponent<ButtonEquipmentPanelToggle>().SwitchMode(CurrentMode);
             if (_currentPanel.GetComponent<PanelGeneric>().Hidden && prevPanel != null)

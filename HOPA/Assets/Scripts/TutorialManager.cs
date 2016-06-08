@@ -6,6 +6,7 @@ public class TutorialManager : Singleton<TutorialManager> {
     #region public
 
     public bool IsEnabled;
+    public bool EquipmentWasShown;
     public GameObject[] TutorialMessages;
 
     #endregion
@@ -70,7 +71,7 @@ public class TutorialManager : Singleton<TutorialManager> {
         }
     }
 
-    void FinishTutorial()
+    public void FinishTutorial()
     {
         IsEnabled = false;
     }
@@ -96,5 +97,18 @@ public class TutorialManager : Singleton<TutorialManager> {
         }
     }
 
+    public void ShowMessageOutOfQueue(int i)
+    {
+        HideCurrentMessage();
+        if(IsEnabled)
+        {
+            TutorialMessages[i].SetActive(true);
+        }
+    }
+
+    public void DisableEquipmentHint()
+    {
+        EquipmentWasShown = true;
+    }
     #endregion
 }
