@@ -21,7 +21,7 @@ public class ClickMarkManager : Singleton<ClickMarkManager>
     public Color ColorClickUI;
     public Color ColorClickInteraction;
 
-    public float TimeTakesSeconds = 1.0f;
+    public float TimeTakesSeconds = 0.6f;
 
     #endregion
 
@@ -122,8 +122,6 @@ public class ClickMarkManager : Singleton<ClickMarkManager>
 
     private IEnumerator ClickCoroutine()
     {
-        float a = 0.15f * TimeTakesSeconds;
-        float b = 0.7f * TimeTakesSeconds;
         _trn.localScale = Vector3.zero;
         _grp.alpha = 0.0f;
         float time = 0.0f;
@@ -133,20 +131,9 @@ public class ClickMarkManager : Singleton<ClickMarkManager>
             time += Time.deltaTime;
             Vector3 scl = Vector3.Lerp(Vector3.zero, Vector3.one, time);
             float alphaMplier = 0.0f;
+            float h = time / Mathf.Max(TimeTakesSeconds, 0.0000001f);
 
-            if(time < a)
-            {
-                alphaMplier = time / a;
-            }
-            else if(time >= a && time < b)
-            {
-                alphaMplier = 1.0f;
-            }
-            else
-            {
-                float c = (TimeTakesSeconds / (TimeTakesSeconds - b));
-                alphaMplier = -c * time + c;
-            }
+            alphaMplier = Mathf.Clamp01(-(2.0f * h - 1.0f) * (2.0f * h - 1.0f) + 1.0f);
 
             _grp.alpha = alphaMplier;
             _trn.localScale = scl;

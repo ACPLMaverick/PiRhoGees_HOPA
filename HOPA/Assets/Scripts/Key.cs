@@ -12,7 +12,6 @@ public class Key : PickableUsableObject
     #region public
 
     public List<DisappearableObject> LockedDisappearableObjects;
-    public AudioClip SoundUnlock;
 
     #endregion
 
@@ -29,9 +28,9 @@ public class Key : PickableUsableObject
             LockedDisappearableObjects[i].LockWithKey(this);
         }
 
-        if(SoundUnlock == null)
+        if(UseSound == null)
         {
-            SoundUnlock = AudioManager.Instance.DefaultSoundKeyUnlock;
+            UseSound = AudioManager.Instance.DefaultSoundKeyUnlock;
         }
 	}
 	
@@ -49,7 +48,7 @@ public class Key : PickableUsableObject
             LockedDisappearableObjects.Contains(other.GetComponent<DisappearableObject>()))
         {
             other.GetComponent<DisappearableObject>().UnlockWithKey(this);
-            AudioManager.Instance.PlayClip(SoundUnlock);
+            AudioManager.Instance.PlayClip(UseSound);
         }
     }
 

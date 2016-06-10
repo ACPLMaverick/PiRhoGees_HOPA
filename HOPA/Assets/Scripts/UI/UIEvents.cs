@@ -24,6 +24,7 @@ public class UIEvents : MonoBehaviour {
     {
         _txtToggleSoundOff = AudioToggleButton.GetComponentsInChildren<Text>()[0];
         _txtToggleSoundOn = AudioToggleButton.GetComponentsInChildren<Text>()[1];
+        PlayerPrefs.SetInt("bFingerprint",0);
 
         ToggleSoundText(AudioManager.Instance.IsAudioMuted);
     }

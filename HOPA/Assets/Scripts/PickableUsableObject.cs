@@ -11,11 +11,12 @@ public class PickableUsableObject : PickableObject
     #endregion
 
     #region constants
-    
+
     #endregion
 
     #region public
 
+    public AudioClip UseSound;
     public List<PickableUsableObject> InteractableObjects;  // sth else will be here
     public Dictionary<PickableUsableObject, List<PickableUsableObject>> MergableObjects;
     public GameObject TargetObject; //To decide with which object, PUObject will interract
@@ -24,6 +25,13 @@ public class PickableUsableObject : PickableObject
 
     #region properties
 
+    public UsableContainer AssociatedContainer
+    {
+        get
+        {
+            return _container;
+        }
+    }
     public bool IsInEquipment { get; protected set; }
 
     #endregion
@@ -35,7 +43,8 @@ public class PickableUsableObject : PickableObject
     private bool _actionsLocked = false;
     private Transform _tempTransform = null;
     private Canvas _canvasForSelectedUsable = null;
-    private bool _destroyOnClickUp = false;
+    [SerializeField]
+    private bool DestroyOnUse = false;
 
     #endregion
 
@@ -57,11 +66,21 @@ public class PickableUsableObject : PickableObject
 
     public void AssignEquipmentContainer(UsableContainer container)
     {
-        _container = container;
-        GetComponent<SpriteRenderer>().enabled = false;
-        _container.UsableField.PointerUpEvent.AddListener(new UnityEngine.Events.UnityAction<UnityEngine.EventSystems.PointerEventData>(OnClickUpInEquipment));
-        _container.UsableField.DragEvent.AddListener(new UnityEngine.Events.UnityAction<UnityEngine.EventSystems.PointerEventData>(OnClickHoldInEquipment));
-        _container.UsableField.PointerDownEvent.AddListener(new UnityEngine.Events.UnityAction<UnityEngine.EventSystems.PointerEventData>(OnClickDownInEquipment));
+        if(container != null)
+        {
+            _container = container;
+            GetComponent<SpriteRenderer>().enabled = false;
+            _container.UsableField.PointerUpEvent.AddListener(OnClickUpInEquipment);
+            _container.UsableField.DragEvent.AddListener(OnClickHoldInEquipment);
+            _container.UsableField.PointerDownEvent.AddListener(OnClickDownInEquipment);
+        }
+        else if(_container != null)
+        {
+            _container.UsableField.PointerUpEvent.RemoveListener(OnClickUpInEquipment);
+            _container.UsableField.DragEvent.RemoveListener(OnClickHoldInEquipment);
+            _container.UsableField.PointerDownEvent.RemoveListener(OnClickDownInEquipment);
+            _container = null;
+        }
     }
 
     protected override void PickUp(Vector2 position, Collider2D col)
@@ -93,6 +112,8 @@ public class PickableUsableObject : PickableObject
 
             // here will play professional animation, for now just simple coroutine
             // destruction will also be performed somewhat smarter
+            
+            // yeah right.
         }
     }
 
@@ -155,9 +176,10 @@ public class PickableUsableObject : PickableObject
 
             _actionsLocked = true;
 
-            if(_destroyOnClickUp)
+            if(actionDone && DestroyOnUse)
             {
-                Destroy(gameObject, 0.6f);
+                EquipmentManager.Instance.RemoveObjectFromPool(this, 0.6f);
+                StartCoroutine(OnClickUpDestroyCoroutine(_container.UsableField, _startSlotPosition, 1.2f));
             }
             else
             {
@@ -203,8 +225,22 @@ public class PickableUsableObject : PickableObject
         yield return null;
     }
 
+    protected System.Collections.IEnumerator OnClickUpDestroyCoroutine(UsableContainerField fieldRef, Vector2 targetPos, float lagSeconds)
+    {
+        yield return new WaitForSeconds(lagSeconds);
+        fieldRef.GetComponent<RectTransform>().position = targetPos;
+        fieldRef.transform.SetParent(_tempTransform, true);
+        Destroy(this);
+        yield return null;
+    }
+
     protected virtual void PerformActionOnClick(GameObject other)
     {
+        if(other != null)
+        {
+            if(UseSound != null)
+                AudioManager.Instance.PlayClip(UseSound);
+        }
         if(other != null && other.Equals(TargetObject))
         {
             //Debug.Log(other.name);
@@ -214,7 +250,7 @@ public class PickableUsableObject : PickableObject
 
     protected void ScheduleToDestroyOnClickUp()
     {
-        _destroyOnClickUp = true;
+        DestroyOnUse = true;
     }
 
     #endregion

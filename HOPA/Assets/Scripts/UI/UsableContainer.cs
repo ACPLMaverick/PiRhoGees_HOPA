@@ -57,6 +57,7 @@ public class UsableContainer : MonoBehaviour
     {
         if(AssociatedObject != null)
         {
+            IsFree = true;
             StartCoroutine(AddObjectToPoolFadeCoroutine(0.6f, 1.0f, 0.0f, false));
         }
     }
@@ -78,7 +79,6 @@ public class UsableContainer : MonoBehaviour
         if(!assign)
         {
             AssociatedObject = null;
-            UsableField.UsableImage.sprite = null;
             UsableField.UsableImage.enabled = false;
         }
 

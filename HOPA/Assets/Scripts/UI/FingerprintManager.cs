@@ -8,6 +8,7 @@ public class FingerprintManager : Singleton<FingerprintManager>
 
     public Image Fingerprint;
     public bool DisappearIfNotHold = false;
+    public bool DoNotUseInputManager = false;
 
     #endregion
 
@@ -15,6 +16,7 @@ public class FingerprintManager : Singleton<FingerprintManager>
 
     private Vector3 _beginScale;
     private float _scaleMplier = 1.25f;
+    private bool _janusz;
 
     #endregion
 
@@ -32,9 +34,12 @@ public class FingerprintManager : Singleton<FingerprintManager>
 
             _beginScale = Fingerprint.rectTransform.localScale;
 
-            InputManager.Instance.OnInputClickUp.AddListener(OnClickUp);
-            InputManager.Instance.OnInputClickDown.AddListener(OnClickDown);
-            InputManager.Instance.OnInputMove.AddListener(OnMove);
+            if(!DoNotUseInputManager)
+            {
+                InputManager.Instance.OnInputClickUp.AddListener(OnClickUp);
+                InputManager.Instance.OnInputClickDown.AddListener(OnClickDown);
+                InputManager.Instance.OnInputMove.AddListener(OnMove);
+            }
 
             if(DisappearIfNotHold)
             {
@@ -51,7 +56,47 @@ public class FingerprintManager : Singleton<FingerprintManager>
 	// Update is called once per frame
 	void Update ()
     {
-	
+	    if(DoNotUseInputManager)
+        {
+            if(Application.isMobilePlatform)
+            {
+                if(Input.touchCount != 0)
+                {
+                    Touch t = Input.GetTouch(0);
+
+                    OnMove(t.position, t.deltaPosition, null);
+
+                    if(t.phase == TouchPhase.Began)
+                    {
+                        OnClickDown(t.position, null);
+                    }
+                    else if(t.phase == TouchPhase.Ended)
+                    {
+                        OnClickUp(t.position, null);
+                    }
+                }
+            }
+            else
+            {
+                Vector2 pos = Input.mousePosition;
+
+                if(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+                {
+                    OnClickDown(pos, null);
+                    _janusz = true;
+                }
+                else if(Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
+                {
+                    OnClickUp(pos, null);
+                    _janusz = false;
+                }
+
+                if(_janusz)
+                {
+                    OnMove(pos, pos, null);
+                }
+            }
+        }
 	}
 
     private void OnClickDown(Vector2 screenPos, Collider2D col)

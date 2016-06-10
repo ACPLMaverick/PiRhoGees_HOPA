@@ -167,6 +167,7 @@ public class EquipmentManager : Singleton<EquipmentManager>
             return;
         }
 
+        ++_usableContainersOccupiedCount;
         StartCoroutine(AddObjectToPoolCoroutine(obj, lagSeconds));
         if(CurrentMode == EquipmentMode.USABLES)
         {
@@ -174,6 +175,12 @@ public class EquipmentManager : Singleton<EquipmentManager>
         }
 
         obj.gameObject.layer = LayerMask.NameToLayer("UI");
+    }
+
+    public void RemoveObjectFromPool(PickableUsableObject obj, float lagSeconds)
+    {
+        --_usableContainersOccupiedCount;
+        StartCoroutine(RemoveObjectFromPoolCoroutine(obj, lagSeconds));
     }
 
     public void OnButtonEquipmentPanelToggle()
@@ -244,6 +251,16 @@ public class EquipmentManager : Singleton<EquipmentManager>
         container.AssignEquipmentUsable(obj);
 
         _usableList.Add(obj);
+
+        yield return null;
+    }
+
+    private IEnumerator RemoveObjectFromPoolCoroutine(PickableUsableObject obj, float lagSeconds)
+    {
+        yield return new WaitForSeconds(lagSeconds);
+
+        obj.AssociatedContainer.UnassignEquipmentUsable();
+        obj.AssignEquipmentContainer(null);
 
         yield return null;
     }
