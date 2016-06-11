@@ -7,6 +7,7 @@ public class RoomTransition : MonoBehaviour
 
     public Room RoomTo;
     public bool Locked = false;
+    public bool DeactivateAfterRoomFinished = true;
 
     #endregion
 
@@ -32,6 +33,9 @@ public class RoomTransition : MonoBehaviour
         {
             _tRing.gameObject.SetActive(false);
         }
+
+        if(DeactivateAfterRoomFinished)
+            RoomTo.FinishedEvent.AddListener(OnRoomFinished);
 	}
 	
 	// Update is called once per frame
@@ -75,6 +79,12 @@ public class RoomTransition : MonoBehaviour
         {
             GameManager.Instance.TransitionToRoom(RoomTo);
         }
+    }
+
+    protected void OnRoomFinished(Room room)
+    {
+        RoomTo.FinishedEvent.RemoveListener(OnRoomFinished);
+        gameObject.SetActive(false);
     }
 
     #endregion

@@ -140,8 +140,7 @@ public class PickableUsableObject : PickableObject
             {
                 if (!actionDone && hits[i].collider != null && hits[i].collider.gameObject.layer == objectsLayerID)
                 {
-                    PerformActionOnClick(hits[i].collider.gameObject);
-                    actionDone = true;
+                    actionDone = PerformActionOnClick(hits[i].collider.gameObject);
                 }
             }
             
@@ -162,8 +161,7 @@ public class PickableUsableObject : PickableObject
                         UsableContainerField field = results[i].gameObject.GetComponent<UsableContainerField>();
                         if (field != null && !field.Container.IsFree)
                         {
-                            PerformActionOnClick(field.Container.AssociatedObject.gameObject);
-                            actionDone = true;
+                            actionDone = PerformActionOnClick(field.Container.AssociatedObject.gameObject);
                         }
                     }
                 }
@@ -234,18 +232,19 @@ public class PickableUsableObject : PickableObject
         yield return null;
     }
 
-    protected virtual void PerformActionOnClick(GameObject other)
+    protected virtual bool PerformActionOnClick(GameObject other)
     {
-        if(other != null)
-        {
-            if(UseSound != null)
-                AudioManager.Instance.PlayClip(UseSound);
-        }
         if(other != null && other.Equals(TargetObject))
         {
+            if (UseSound != null)
+                AudioManager.Instance.PlayClip(UseSound);
+
             //Debug.Log(other.name);
-            other.GetComponent<Animator>().enabled = true;
+            if (other.GetComponent<Animator>() != null) other.GetComponent<Animator>().enabled = true;
+            return true;
         }
+
+        return false;
     }
 
     protected void ScheduleToDestroyOnClickUp()

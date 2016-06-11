@@ -89,7 +89,7 @@ public class ClickMarkManager : Singleton<ClickMarkManager>
         {
             Click(pos, Mode.INTERACTION);
         }
-        else if(UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        else if(InputManager.Instance.IsPointerOnGui())
         {
             Click(pos, Mode.UI);
         }

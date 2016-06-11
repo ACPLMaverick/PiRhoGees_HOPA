@@ -118,6 +118,8 @@ public class LetterUI : MonoBehaviour
             _contextText.gameObject.GetComponent<CanvasGroup>().alpha = 1;
             _contextText.gameObject.SetActive(true);
 
+            GetComponent<RectTransform>().anchoredPosition = _upPosition;
+
             GetDownPosition(_contextText.GetComponent<RectTransform>());
             _turned = false;
 

@@ -34,6 +34,8 @@ public class GameManager : Singleton<GameManager>
     #region private
 
     private Room _nextRoom = null;
+    private bool _moveInProgress = false;
+    private Coroutine _moveCoroutine = null;
 
     #endregion
 
@@ -68,12 +70,16 @@ public class GameManager : Singleton<GameManager>
     public void TransitionToRoom(Room room)
     {
         _nextRoom = room;
+        int t = 7;
         if(room is RoomPuzzleAssign)
         {
-            StartCoroutine(StartMoveCoroutine(11));
+            t = 11;
         }
-        else 
-            StartCoroutine(StartMoveCoroutine(7));
+
+        if (_moveCoroutine != null)
+            StopCoroutine(_moveCoroutine);
+
+        _moveCoroutine = StartCoroutine(StartMoveCoroutine(t));
         if (CurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != CurrentRoom)
         {
             AudioManager.Instance.PlayMusic(room.AmbientTheme, RoomTransitionTime);
@@ -121,6 +127,7 @@ public class GameManager : Singleton<GameManager>
 
     private IEnumerator StartMoveCoroutine(int tutorialMsg)
     {
+        _moveInProgress = true;
         float cTime = Time.time;
         FadeImage.gameObject.SetActive(true);
         FadeImage.canvasRenderer.SetAlpha(0.0f);
@@ -136,6 +143,7 @@ public class GameManager : Singleton<GameManager>
 
         //Thanks to this, tutorial message will appear when screen fades out
         TutorialManager.Instance.GoStepFurther(tutorialMsg);
+        _moveInProgress = false;
 
         yield return null;
     }

@@ -33,9 +33,8 @@ public class Letter : PickableObject
                                     "Kustosz Muzeum Kinematografii w Łodzi\n" +
                                     "Stefan Grajgór";
     private string _secondSideContextText = "Proszę o przygotowanie do otwarcia wystawy, pod tytułem \"Od negatywu do kopii\"";
-    private string _contextText_puzzle1 = "Zadanie zostało wykonane bezbłędnie, jednak to nie koniec pracy na dzisiaj. W swoim osobliwym dla niektórych zwyczaju," +
-                                    "oprócz zaradności testuję także wiedzę moich pracowników. Przygotowałem dla {0} jedną z kilku zagadek jakie mam w zanadrzu." +
-                                    "Ot wystarczy dopasować tytuł filmu do odpowiadającego mu plakatu. \n" +
+    private string _contextText_puzzle1 = "Jestem bardzo zadowolony z {0} dotychczasowej pracy. Przyszła zatem kolej na następny sprawdzian teoretyczny. " +
+                                    "Ot, wystarczy dopasować tytuł filmu do odpowiadającego mu plakatu. \n" +
                                     "Życzę powodzenia.\n\n" +
                                     "Stefan Grajgór";
     private string _contextText2 = "Przepraszam, że nie zostawiłem żadnej notatki w poprzednim pomieszczeniu, ale jeśli {0} to czyta," +
@@ -43,8 +42,9 @@ public class Letter : PickableObject
                                     " gdyż przewidujemy kilka dużych wycieczek w przeciągu najbliższych dwóch tygodni. " +
                                     "Mam nadzieję, że tak jak poprzednia, nie sprawi najmniejszego kłopotu.\n" +
                                     "Życzę powodzenia.\n\n";
-    private string _contextText_puzzle2 = "Jestem bardzo zadowolony z {0} dotychczasowej pracy. Przyszła zatem kolej na kolejny sprawdzian teoretyczny." +
-                                    "Przygotowałem kilka zdjęć prezentujących konkretne rodzaje kadrów. Zadanie jest proste -" +
+    private string _contextText_puzzle2 = "Zadanie zostało wykonane bezbłędnie, jednak to nie koniec pracy na dzisiaj. W swoim osobliwym dla niektórych zwyczaju, " +
+                                    "oprócz zaradności testuję także wiedzę moich pracowników. Przygotowałem dla {0} jedną z kilku zagadek jakie mam w zanadrzu. " +
+                                    "Oto kilka zdjęć prezentujących konkretne rodzaje kadrów. Zadanie jest proste -" +
                                     " spośród dostępnych opcji wybrać tę, która pasuje do przedstawionego na zdjęciu kadru.\n" +
                                     "Życzę powodzenia.\n\n" +
                                     "Stefan Grajgór";

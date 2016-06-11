@@ -91,7 +91,7 @@ public class CameraManager : Singleton<CameraManager>
 
         // check if we point the background or other object
         // we hit other object or nothing - return
-        if (hitCollider == null || !SortingLayerAllowed(hitCollider) || !Enabled)
+        if (hitCollider == null || hitCollider.gameObject == null || !SortingLayerAllowed(hitCollider) || !Enabled)
         {
             return;
         }

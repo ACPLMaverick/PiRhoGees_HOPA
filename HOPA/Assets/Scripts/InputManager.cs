@@ -80,6 +80,8 @@ public class InputManager : Singleton<InputManager>
     private float _shakeLastTimeSeconds = 0.0f;
 
     private float _diffPinchHelper;
+    private bool _isPointerOnGui;
+    private bool _isPointerOnGuiOld;
     //private KeyValuePair<int, SortedList<int, Collider2D>>[] _sortLayerList;
     //private int _sLayerCount;
 
@@ -398,6 +400,31 @@ public class InputManager : Singleton<InputManager>
         return Physics2D.RaycastAll(clickPos, clickPos, 0.01f, Physics2D.DefaultRaycastLayers, -10.0f, 10.0f);
     }
 
+    public bool IsPointerOnGui()
+    {
+        //Debug.Log("IPG EXTERNAL: " + _isPointerOnGui.ToString());
+        if (Application.isMobilePlatform)
+            return _isPointerOnGuiOld;
+        else
+            return _isPointerOnGui;
+    }
+
+    private bool IsPointerOnGuiInternal()
+    {
+        int pointerID = 0;
+        if (!Application.isMobilePlatform)
+        {
+            pointerID = -1;
+        }
+
+        // returning previous - on mobile it seems to fix that annoying bug
+        _isPointerOnGuiOld = _isPointerOnGui;
+        _isPointerOnGui = EventSystem.current.IsPointerOverGameObject(pointerID);
+        //Debug.Log("IPG INTERNAL: " + _isPointerOnGui.ToString());
+
+        return IsPointerOnGui();
+    }
+
     public Collider2D GetCollider2DUnderCursor()
     {
         //for(int i = 0; i < _sLayerCount; ++i)
@@ -408,16 +435,26 @@ public class InputManager : Singleton<InputManager>
         RaycastHit2D[] hits = GetRaycastHitsUnderCursor();
         int hitCount = hits.Length;
 
-        if(EventSystem.current.IsPointerOverGameObject())
+        //List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
+        //PointerEventData pData = new PointerEventData(EventSystem.current);
+        //EventSystem.current.RaycastAll(pData, uiRaycastResults);
+
+        
+
+        //if(uiRaycastResults.Count != 0)
+        if (IsPointerOnGuiInternal())
         {
+            //Debug.Log("IM: UI HIT");
             return _dummyCollider2D;    // for camera manager purpose
         }
         else if(hitCount != 0)
         {
+            //Debug.Log("IM: OBJ HIT");
             return hits[0].collider;
         }
         else
         {
+            //Debug.Log("IM: NTH HIT");
             return null;
         }
 

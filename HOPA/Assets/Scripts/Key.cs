@@ -12,6 +12,7 @@ public class Key : PickableUsableObject
     #region public
 
     public List<DisappearableObject> LockedDisappearableObjects;
+    public bool DestroyOnSuccessfulUse = true;
 
     #endregion
 
@@ -40,16 +41,19 @@ public class Key : PickableUsableObject
         base.Update();
 	}
 
-    protected override void PerformActionOnClick(GameObject other)
+    protected override bool PerformActionOnClick(GameObject other)
     {
-        base.PerformActionOnClick(other);
+        bool b = base.PerformActionOnClick(other);
 
         if(other != null && other.GetComponent<DisappearableObject>() != null &&
             LockedDisappearableObjects.Contains(other.GetComponent<DisappearableObject>()))
         {
             other.GetComponent<DisappearableObject>().UnlockWithKey(this);
             AudioManager.Instance.PlayClip(UseSound);
+            return DestroyOnSuccessfulUse;
         }
+
+        return b;
     }
 
     #endregion
