@@ -16,6 +16,7 @@ public class DisappearableObject : MonoBehaviour
 
     #region public
 
+    public AudioClip SoundDisappear;
     public List<RoomTransition> AssociatedTransitions;
     public GameObject ObjectToDisappear;
     public float TimeFadeOutSeconds = 1.0f;
@@ -116,6 +117,11 @@ public class DisappearableObject : MonoBehaviour
     {
         if(!_disappearInProgress)
         {
+            if (SoundDisappear != null)
+            {
+                AudioManager.Instance.PlayClip(SoundDisappear);
+            }
+
             if (Mode == DisappearableMode.DISAPPEAR)
             {
                 gameObject.SetActive(true);

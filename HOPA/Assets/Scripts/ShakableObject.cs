@@ -5,6 +5,8 @@ public class ShakableObject : MonoBehaviour
 {
     #region public
 
+    public AudioClip SoundShake;
+
     #endregion
 
     #region protected
@@ -30,6 +32,10 @@ public class ShakableObject : MonoBehaviour
 
     protected void Shake(Vector3 shakeVec)
     {
+        if(SoundShake != null)
+        {
+            AudioManager.Instance.PlayClip(SoundShake);
+        }
         _animator.SetBool("IsShake", true);
 
         InputManager.Instance.OnInputShake.RemoveListener(Shake);
