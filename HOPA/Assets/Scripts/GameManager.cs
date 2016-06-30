@@ -168,6 +168,7 @@ public class GameManager : Singleton<GameManager>
         CurrentRoom.Leave();
         Room tmpCurrentRoom = CurrentRoom;
         CurrentRoom = _nextRoom;
+        PickableHintManager.Instance.Flush();
         //_nextRoom = CurrentRoom.PuzzleRoom;
 
         if (tmpCurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != tmpCurrentRoom)

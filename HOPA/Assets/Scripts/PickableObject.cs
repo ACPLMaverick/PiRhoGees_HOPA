@@ -60,6 +60,8 @@ public class PickableObject : MonoBehaviour
         }
     }
 
+    public bool Picked { get { return _picked; } }
+
 
     #endregion
 
@@ -138,6 +140,7 @@ public class PickableObject : MonoBehaviour
 
             EquipmentManager.Instance.AddObjectToList(this, FADE_OUT_TIME_SEC);
             InputManager.Instance.OnInputClickUp.RemoveListener(PickUp);
+            PickableHintManager.Instance.Flush();
             //col.gameObject.transform.SetParent(Camera.main.transform, true);
 
             _picked = true;
