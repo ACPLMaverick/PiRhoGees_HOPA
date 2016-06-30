@@ -28,12 +28,15 @@ public class LetterUI : MonoBehaviour
     private Text _secondSideContextText;
     private Image _edgeFadeLeft;
     private Image _edgeFadeRight;
+    private Button _btnLeft;
+    private Button _btnRight;
 
     private bool _isCurrentlyTwoSided = false;
     private bool _turned;
 
     private Vector2 _upPosition;
     private Vector2 _downPosition;
+    private float _btnBeginY;
 
     #endregion
 
@@ -74,6 +77,11 @@ public class LetterUI : MonoBehaviour
                 _edgeFadeLeft = images[i];
             }
         }
+
+        Button[] btns = GetComponentsInChildren<Button>();
+        _btnLeft = btns[0];
+        _btnRight = btns[1];
+        _btnBeginY = _btnLeft.transform.localPosition.y;
     }
 
     // Use this for initialization
@@ -107,6 +115,7 @@ public class LetterUI : MonoBehaviour
             gameObject.SetActive(true);
             _secondSideContextText.gameObject.SetActive(false);
             _edgeFadeLeft.gameObject.SetActive(false);
+            _btnLeft.gameObject.SetActive(false);
 
             _headerText.text = header;
             _contextText.text = context;
@@ -117,6 +126,9 @@ public class LetterUI : MonoBehaviour
             _headerText.gameObject.SetActive(true);
             _contextText.gameObject.GetComponent<CanvasGroup>().alpha = 1;
             _contextText.gameObject.SetActive(true);
+
+            _btnLeft.transform.localPosition = new Vector3(_btnLeft.transform.localPosition.x, _btnBeginY, _btnLeft.transform.transform.localPosition.z);
+            _btnRight.transform.localPosition = new Vector3(_btnRight.transform.localPosition.x, _btnBeginY, _btnRight.transform.transform.localPosition.z);
 
             GetComponent<RectTransform>().anchoredPosition = _upPosition;
 
@@ -151,8 +163,23 @@ public class LetterUI : MonoBehaviour
             newPosition.y = Mathf.Max(Mathf.Min(newPosition.y, _downPosition.y), _upPosition.y);
             newPosition.x = _upPosition.x;
 
+            float zdziszek = _btnLeft.transform.localPosition.y - (newPosition.y - rt.anchoredPosition.y);
+
+            _btnLeft.transform.localPosition = new Vector3(_btnLeft.transform.localPosition.x, zdziszek, _btnLeft.transform.transform.localPosition.z);
+            _btnRight.transform.localPosition = new Vector3(_btnRight.transform.localPosition.x, zdziszek, _btnRight.transform.transform.localPosition.z);
+
             rt.anchoredPosition = newPosition;
         }
+    }
+
+    public void TurnLeft()
+    {
+        TurnPage(Vector2.zero, InputManager.SwipeDirection.LEFT, 100.0f, null);
+    }
+
+    public void TurnRight()
+    {
+        TurnPage(Vector2.zero, InputManager.SwipeDirection.RIGHT, 100.0f, null);
     }
 
     private void TurnPage(Vector2 origin, InputManager.SwipeDirection dir, float length, Collider2D col)
@@ -178,6 +205,7 @@ public class LetterUI : MonoBehaviour
                 StartCoroutine(Utility.FadeCoroutineUI(_secondSideContextText.GetComponent<CanvasGroup>(), 0.0f, 1.0f, t, true));
 
                 _edgeFadeLeft.gameObject.SetActive(true);
+                _btnLeft.gameObject.SetActive(true);
                 StartCoroutine(Utility.FadeCoroutineUI(_edgeFadeLeft.GetComponent<CanvasGroup>(), 0.0f, 1.0f, t, true));
                 //StartCoroutine(Utility.FadeCoroutineUI(_edgeFadeRight.GetComponent<CanvasGroup>(), 1.0f, 0.0f, t, false));
 
@@ -201,6 +229,8 @@ public class LetterUI : MonoBehaviour
 
                 StartCoroutine(Utility.FadeCoroutineUI(_edgeFadeLeft.GetComponent<CanvasGroup>(), 1.0f, 0.0f, t, false));
                 _edgeFadeRight.gameObject.SetActive(true);
+                _edgeFadeLeft.gameObject.SetActive(false);
+                _btnLeft.gameObject.SetActive(false);
                 //StartCoroutine(Utility.FadeCoroutineUI(_edgeFadeRight.GetComponent<CanvasGroup>(), 0.0f, 1.0f, t, true));
 
                 StartCoroutine(SlideToPositionCoroutine(_upPosition, 0.5f));
