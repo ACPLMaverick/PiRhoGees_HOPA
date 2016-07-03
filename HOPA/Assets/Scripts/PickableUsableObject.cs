@@ -126,6 +126,8 @@ public class PickableUsableObject : PickableObject
     {
         if (!_actionsLocked)
         {
+            FloatingParticleManager.Instance.Hide();
+
             bool actionDone = false;
             // check for mouse collisions with scene objects
             RaycastHit2D[] hits = InputManager.Instance.GetRaycastHitsUnderCursor();
@@ -193,6 +195,7 @@ public class PickableUsableObject : PickableObject
             _tempTransform = _container.transform;
             _container.UsableField.transform.SetParent(_canvasForSelectedUsable.transform, true);
             _startSlotPosition = _container.UsableField.GetComponent<RectTransform>().position;
+            FloatingParticleManager.Instance.Show(_container.UsableField.gameObject, TargetObject);
         }
     }
 
