@@ -36,6 +36,7 @@ public class GameManager : Singleton<GameManager>
     private Room _nextRoom = null;
     private bool _moveInProgress = false;
     private Coroutine _moveCoroutine = null;
+    private Coroutine _endCoroutine = null;
 
     #endregion
 
@@ -78,6 +79,8 @@ public class GameManager : Singleton<GameManager>
 
         if (_moveCoroutine != null)
             StopCoroutine(_moveCoroutine);
+        if (_endCoroutine != null)
+            StopCoroutine(_endCoroutine);
 
         _moveCoroutine = StartCoroutine(StartMoveCoroutine(t));
         if (CurrentRoom.ParentRoom == null && _nextRoom.ParentRoom != CurrentRoom)
@@ -182,7 +185,11 @@ public class GameManager : Singleton<GameManager>
         CameraManager.Instance.RecalculateToCurrentRoom();
         CameraManager.Instance.Enabled = CurrentRoom.CameraEnabled;
 
-        StartCoroutine(EndMoveCoroutine());
+        if (_endCoroutine != null)
+            StopCoroutine(_endCoroutine);
+        if (_moveCoroutine != null)
+            StopCoroutine(_moveCoroutine);
+        _endCoroutine = StartCoroutine(EndMoveCoroutine());
     }
 
     private void OnRoomCommonPickablesCollected(Room r)
