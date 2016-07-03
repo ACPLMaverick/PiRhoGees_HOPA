@@ -96,9 +96,12 @@ public class DisappearableObject : MonoBehaviour
         if(_keysWhichLockMe.Contains(key))
         {
             _keysWhichLockMe.Remove(key);
-        }
 
-        OnClickUp(Camera.main.WorldToScreenPoint(GetComponent<Transform>().position), GetComponent<Collider2D>());
+            if (_keysWhichLockMe.Count == 0)
+            {
+                OnClickUp(Camera.main.WorldToScreenPoint(GetComponent<Transform>().position), GetComponent<Collider2D>());
+            }
+        }
     }
 
     protected virtual void OnClickUp(Vector2 screenPos, Collider2D hitCollider2D)
