@@ -247,16 +247,26 @@ public class LetterUI : MonoBehaviour
         float currentTime = Time.time;
         RectTransform rt = GetComponent<RectTransform>();
         Vector2 startPos = rt.anchoredPosition;
+        Vector2 lBtnStartPos = _btnLeft.transform.localPosition;
+        Vector2 rBtnStartPos = _btnRight.transform.localPosition;
+        Vector2 lBtnFinalPos = lBtnStartPos;
+        lBtnFinalPos.y = _btnBeginY;
+        Vector2 rBtnFinalPos = rBtnStartPos;
+        rBtnFinalPos.y = _btnBeginY;
 
         while (Time.time - currentTime <= timeSec)
         {
             float lerp = (Time.time - currentTime) / timeSec;
             Vector2 pos = Vector2.Lerp(startPos, position, lerp);
+            _btnLeft.transform.localPosition = Vector2.Lerp(lBtnStartPos, lBtnFinalPos, lerp);
+            _btnRight.transform.localPosition = Vector2.Lerp(rBtnStartPos, rBtnFinalPos, lerp);
             rt.anchoredPosition = pos;
 
             yield return null;
         }
         rt.anchoredPosition = position;
+        _btnLeft.transform.localPosition = lBtnFinalPos;
+        _btnRight.transform.localPosition = rBtnFinalPos;
 
         yield return null;
     }
